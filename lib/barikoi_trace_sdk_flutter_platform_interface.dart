@@ -8,7 +8,8 @@ abstract class BarikoiTraceSdkFlutterPlatform extends PlatformInterface {
 
   static final Object _token = Object();
 
-  static BarikoiTraceSdkFlutterPlatform _instance = MethodChannelBarikoiTraceSdkFlutter();
+  static BarikoiTraceSdkFlutterPlatform _instance =
+      MethodChannelBarikoiTraceSdkFlutter();
 
   /// The default instance of [BarikoiTraceSdkFlutterPlatform] to use.
   ///
@@ -23,7 +24,26 @@ abstract class BarikoiTraceSdkFlutterPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<String?> getPlatformVersion() {
-    throw UnimplementedError('platformVersion() has not been implemented.');
+  void initialize({required String apiKey});
+
+  Future<String?> getUserId() {
+    throw UnimplementedError('getUserId() has not been implemented.');
   }
+
+  Future<String?> getUser() {
+    throw UnimplementedError('getUser() has not been implemented.');
+  }
+
+  void setOrCreateUser({required String name,String? email, required String phone});
+
+  Future<bool?> isLocationPermissionsGranted() {
+    throw UnimplementedError('isLocationPermissionsGranted() has not been implemented.');
+  }
+
+  Future<bool?> isLocationSettingsOn() {
+    throw UnimplementedError('isLocationSettingsOn() has not been implemented.');
+  }
+
+  void startTracking({required String tag});
+  void endTracking();
 }

@@ -16,35 +16,28 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
   final _barikoiTraceSdkFlutterPlugin = BarikoiTraceSdkFlutter();
 
   @override
   void initState() {
     super.initState();
-    initPlatformState();
+    initBarikoiTrace();
   }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    // We also handle the message potentially returning null.
-    try {
-      platformVersion =
-          await _barikoiTraceSdkFlutterPlugin.getPlatformVersion() ?? 'Unknown platform version';
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
-    }
+  Future<void> initBarikoiTrace() async {
+    await _barikoiTraceSdkFlutterPlugin.initialize(apiKey: "Barikoi_api");
+  }
 
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
+  Future<void> setOrCreateUser() async {
+    await _barikoiTraceSdkFlutterPlugin.setOrCreateUser(name: 'sakib 4', phone: '01676529696');
+  }
 
-    setState(() {
-      _platformVersion = platformVersion;
-    });
+  Future<void> startTracing() async {
+    await _barikoiTraceSdkFlutterPlugin.startTracking(tag: "test");
+  }
+
+  Future<void> stopTracing() async {
+    await _barikoiTraceSdkFlutterPlugin.stopTracking();
   }
 
   @override
@@ -55,7 +48,20 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: Center(
-          child: Text('Running on: $_platformVersion\n'),
+          child: Column(
+            children: [
+              const Text('Running on: '),
+              ElevatedButton(onPressed: (){
+                setOrCreateUser();
+              }, child: const Text("set user")),
+              ElevatedButton(onPressed: (){
+                startTracing();
+              }, child: const Text("Start Trace")),
+              ElevatedButton(onPressed: (){
+                stopTracing();
+              }, child: const Text("Stop Trace")),
+            ],
+          ),
         ),
       ),
     );
