@@ -48,7 +48,7 @@ class BarikoiTraceSdkFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityA
                     if (!BarikoiTrace.isLocationSettingsOn()) {
                         BarikoiTrace.requestLocationServices(it)
                     }
-                    BarikoiTrace.checkAppServicePermission(it)
+//                    BarikoiTrace.checkAppServicePermission(it)
                 }
                 result.success(true)
             }
@@ -70,18 +70,13 @@ class BarikoiTraceSdkFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityA
                         object : BarikoiTraceUserCallback {
                             override fun onFailure(barikoiError: BarikoiTraceError?) {
                                 if (barikoiError != null) {
-                                    Toast.makeText(it, barikoiError.message, Toast.LENGTH_SHORT)
-                                        .show()
+                                    result.error(barikoiError.code, barikoiError.message, null)
                                 }
                             }
 
                             override fun onSuccess(traceUser: BarikoiTraceUser?) {
                                 if (traceUser != null) {
-                                    Toast.makeText(
-                                        it,
-                                        "user set: " + traceUser.userId,
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                                    result.success(traceUser)
                                 }
                                 BarikoiTrace.syncTripstate(object : BarikoiTraceTripStateCallback {
                                     override fun onSuccess() {
@@ -99,18 +94,28 @@ class BarikoiTraceSdkFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityA
             }
 
             "startTracking" -> {
-                val tag = call.argument("tag") ?: "test"
+                val tag = call.argument("tag") ?: null
+                val updateInterval = call.argument("updateInterval") ?: 5
+                val distanceFilter = call.arguement("distanceFilter") ?: 0
+                val accuracyFilter = call.argument("accuracyFilter") ?: 300
+                TraceMode.Builder tracemode = TraaceMode.Builder()
+                tracemode.setUpdateInterval(updateInterval)
+                tracemode.setDistanceFilter(distanceFilter)
+                tracemode.setAccuracyFilter(accuracyFilter)
                 activity.let {
                     BarikoiTrace.requestNotificationPermission(it)
                     if (!BarikoiTrace.isLocationPermissionsGranted()) {
                         BarikoiTrace.requestLocationPermissions(it)
+                        result.error("LOCATION_PERMISSION_DENIED", "Location permission denied", null)
                     }
                     if (!BarikoiTrace.isLocationSettingsOn()) {
                         BarikoiTrace.requestLocationServices(it)
+                        result.error("LOCATION_SETTINGS_OFF", "Location settings off", null)
+                        return
                     }
-                    BarikoiTrace.checkAppServicePermission(it)
+//                    BarikoiTrace.checkAppServicePermission(it)
 
-                    BarikoiTrace.startTracking(TraceMode.ACTIVE)
+                    BarikoiTrace.startTracking(tracemode.build())
                 }
                 result.success(true)
             }
@@ -122,8 +127,23 @@ class BarikoiTraceSdkFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityA
 
             "getUserId" -> {}
             "getUser" -> {}
-            "isLocationPermissionsGranted" -> {}
-            "isLocationSettingsOn" -> {}
+            "isLocationPermissionsGranted" -> {
+                activity.let {
+                    if (!BarikoiTrace.isLocationPermissionsGranted()) {
+                        result.error("LOCATION_PERMISSION_DENIED", "Location permission denied", null)
+                    }
+                    else result.success(true)
+                }
+
+            }
+            "isLocationSettingsOn" -> {
+                activity.let {
+                    if (!BarikoiTrace.isLocationSettingsOn()) {
+                        result.error("LOCATION_SETTINGS_OFF", "Location settings off", null)
+                    }
+                    else result.success(true)
+                }
+            }
             else -> result.notImplemented()
         }
 

@@ -25,15 +25,15 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> initBarikoiTrace() async {
-    await _barikoiTraceSdkFlutterPlugin.initialize(apiKey: "Barikoi_api");
+    await _barikoiTraceSdkFlutterPlugin.initialize(apiKey: "MjA1NDo4MjBSTUxLTEs5");
   }
 
   Future<void> setOrCreateUser() async {
-    await _barikoiTraceSdkFlutterPlugin.setOrCreateUser(name: 'sakib 4', phone: '01676529696');
+    await _barikoiTraceSdkFlutterPlugin.setOrCreateUser(name: 'sakib 4', phone: '01676529696' );
   }
 
   Future<void> startTracing() async {
-    await _barikoiTraceSdkFlutterPlugin.startTracking(tag: "test");
+    await _barikoiTraceSdkFlutterPlugin.startTracking(tag: "test", updateInterval: 15, accuracyfilter: 100);
   }
 
   Future<void> stopTracing() async {
