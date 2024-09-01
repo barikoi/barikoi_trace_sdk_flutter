@@ -76,7 +76,7 @@ class BarikoiTraceSdkFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityA
 
                             override fun onSuccess(traceUser: BarikoiTraceUser?) {
                                 if (traceUser != null) {
-                                    result.success(traceUser)
+                                    result.success(traceUser.userId)
                                 }
                                 BarikoiTrace.syncTripstate(object : BarikoiTraceTripStateCallback {
                                     override fun onSuccess() {
@@ -90,17 +90,18 @@ class BarikoiTraceSdkFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityA
                             }
                         })
                 }
-                result.success(true)
+
             }
 
+
             "startTracking" -> {
-                val tag = call.argument("tag") ?: null
+                val tag = call.argument("tag") ?: ""
                 val updateInterval = call.argument("updateInterval") ?: 5
-                val distanceFilter = call.arguement("distanceFilter") ?: 0
+                val distanceFilter = call.argument("distanceFilter") ?: 0
                 val accuracyFilter = call.argument("accuracyFilter") ?: 300
-                TraceMode.Builder tracemode = TraaceMode.Builder()
+                val tracemode = TraceMode.Builder()
                 tracemode.setUpdateInterval(updateInterval)
-                tracemode.setDistanceFilter(distanceFilter)
+                tracemode.setDistancefilter(distanceFilter)
                 tracemode.setAccuracyFilter(accuracyFilter)
                 activity.let {
                     BarikoiTrace.requestNotificationPermission(it)
