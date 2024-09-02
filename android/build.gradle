@@ -52,6 +52,8 @@ android {
     }
 
     dependencies {
+//        implementation files('libs/barikoitrace.aar')
+        implementation 'com.github.barikoi:barikoitrace-android-sdk:111a930216'
         testImplementation 'org.jetbrains.kotlin:kotlin-test'
         testImplementation 'org.mockito:mockito-core:5.0.0'
     }
@@ -69,6 +71,6 @@ android {
     }
 }
 
-dependencies {
-    implementation 'com.github.barikoi:barikoitrace-android-sdk:111a930216'
-}
+//dependencies {
+//    implementation 'com.github.barikoi:barikoitrace-android-sdk:111a930216'
+//}
