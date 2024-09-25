@@ -34,7 +34,7 @@ To use the plugin, use the following code in dart file:
 import 'package:barikoi_trace_sdk_flutter/barikoi_trace_sdk_flutter.dart';
 
 // to initialize the plugin
-final _barikoiTraceSdkFlutterPlugin = BarikoiTraceSdkFlutter();
+final _barikoiTrace = BarikoiTraceSdkFlutter();
 await _barikoiTrace.initialize(apiKey: "BARIKOI_API_KEY_HERE");
 
 // to set the user with phone, email and name 
