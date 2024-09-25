@@ -33,6 +33,16 @@ class BarikoiTraceSdkFlutter {
     await _channel.invokeMethod('endTracking');
   }
 
+  Future<String> startTrip({int? updateInterval, int? distaceInterval, int? accuracyfilter , String? tag}) async {
+    var arguments = {
+      'tag': tag,
+      updateInterval: updateInterval,
+      distaceInterval: distaceInterval,
+      accuracyfilter: accuracyfilter
+    };
+    return await _channel.invokeMethod('startTrip',arguments);
+  }
+
   // Future<bool?> isLocationPermissionsGranted() async {
   //   return BarikoiTraceSdkFlutterPlatform.instance.isLocationPermissionsGranted();
   // }

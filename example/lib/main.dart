@@ -25,7 +25,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> initBarikoiTrace() async {
-    await _barikoiTraceSdkFlutterPlugin.initialize(apiKey: "BARIKOI_API_KEY");
+    await _barikoiTraceSdkFlutterPlugin.initialize(apiKey: "MjA1NDo4MjBSTUxLTEs5");
   }
 
   Future<void> setOrCreateUser() async {

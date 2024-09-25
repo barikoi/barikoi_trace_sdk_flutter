@@ -126,6 +126,63 @@ class BarikoiTraceSdkFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityA
                 result.success(true)
             }
 
+            "startTrip" -> {
+                val tag = call.argument("tag") ?: ""
+                val updateInterval = call.argument("updateInterval") ?: 5
+                val distanceFilter = call.argument("distanceFilter") ?: 0
+                val accuracyFilter = call.argument("accuracyFilter") ?: 300
+                val tracemode = TraceMode.Builder()
+                tracemode.setUpdateInterval(updateInterval)
+                tracemode.setDistancefilter(distanceFilter)
+                tracemode.setAccuracyFilter(accuracyFilter)
+                activity.let {
+                    BarikoiTrace.requestNotificationPermission(it)
+                    if (!BarikoiTrace.isLocationPermissionsGranted()) {
+                        BarikoiTrace.requestLocationPermissions(it)
+                        result.error("LOCATION_PERMISSION_DENIED", "Location permission denied", null)
+                    }
+                    if (!BarikoiTrace.isLocationSettingsOn()) {
+                        BarikoiTrace.requestLocationServices(it)
+                        result.error("LOCATION_SETTINGS_OFF", "Location settings off", null)
+                        return
+                    }
+                    if(BarikoiTrace.isOnTrip()){
+                        result.error("TRIP_STATE_ERROR", "Trip already started", null)
+                        return
+
+                    }
+//                    BarikoiTrace.checkAppServicePermission(it)
+
+                    BarikoiTrace.startTrip("test", mode, object : BarikoiTraceTripStateCallback() {
+                        fun onSuccess(trip: Trip) {
+                           result.success(trip.getTrip_id())
+                        }
+
+                        fun onFailure(barikoiError: BarikoiTraceError) {
+                            result.error(barikoiError.code, barikoiError.message, null)
+                        }
+                    })
+                }
+            }
+
+            "endTrip" -> {
+                activity.let {
+                    if (!BarikoiTrace.isOnTrip()) {
+                        result.error("TRIP_STATE_ERROR", "Trip not started", null)
+                        return
+                    }
+                    BarikoiTrace.endTrip(object : BarikoiTraceTripStateCallback() {
+                        fun onSuccess(trip: Trip) {
+                            result.success(trip.getTrip_id())
+                        }
+
+                        fun onFailure(barikoiError: BarikoiTraceError) {
+                            result.error(barikoiError.code, barikoiError.message, null)
+                        }
+                    })
+                }
+            }
+
             "getUserId" -> {}
             "getUser" -> {}
             "isLocationPermissionsGranted" -> {

@@ -64,4 +64,5 @@ class MethodChannelBarikoiTraceSdkFlutter extends BarikoiTraceSdkFlutterPlatform
     };
     await methodChannel.invokeMethod('startTracking',arguments);
   }
+
 }
