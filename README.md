@@ -34,16 +34,16 @@ To use the plugin, use the following code in dart file:
 import 'package:barikoi_trace_sdk_flutter/barikoi_trace_sdk_flutter.dart';
 
 // to initialize the plugin
- await _barikoiTrace.initialize(apiKey: "BARIKOI_API_KEY_HERE");
+final _barikoiTraceSdkFlutterPlugin = BarikoiTraceSdkFlutter();
+await _barikoiTrace.initialize(apiKey: "BARIKOI_API_KEY_HERE");
 
 // to set the user with phone, email and name 
-await _barikoiTrace.setOrCreateUser(name: 'sakib 4', phone: '02898138757405947942531335326' )
-    .then((value) { 
-      Fluttertoast.showToast(msg: "suscessfully set user");
-    }).catchError((error){
-    // Handle error
-      Fluttertoast.showToast(msg: error.toString());
-    });
+_barikoiTrace.setOrCreateUser(name: 'sakib 4', phone: 'PHONE_NUMBER',
+    onSuccess: (userid){
+      Fluttertoast.showToast( msg:"user id: $userid");
+    }, onError: (errorCode,errorMessage){
+      Fluttertoast.showToast( msg:"Error: $errorCode, $errorMessage");
+  });
 
 // to start tracking 
 _barikoiTrace.startTracking(tag: "test", updateInterval: 15, accuracyfilter: 100).then((value) {
@@ -54,6 +54,29 @@ _barikoiTrace.startTracking(tag: "test", updateInterval: 15, accuracyfilter: 100
 
 //to stop tracking 
 await _barikoiTrace.stopTracking();
+
+// to start a trip and get the rip id
+if( await Permission.location.request().isGranted) { // check if location permission is granted, here used permission_handler, you can user any package for permission management
+    if(await Permission.notification.request().isGranted) { //check if notification permission is granted
+        _barikoiTrace.startTrip(tag: "test", // tag for the trip, optional
+            updateInterval: 15, // update interval in seconds
+            accuracyfilter: 100, // accuracy filtering for location update in meters
+            onSuccess: (tripid) { // get the trip id
+              Fluttertoast.showToast( msg:"Trip id: $tripid");
+            },
+            onError: (errorCode, errorMessage) {
+              Fluttertoast.showToast( msg: "Error: $errorCode, $errorMessage");
+            });
+    } else Fluttertoast.showToast( msg:"Notification permission not granted");
+}else Fluttertoast.showToast( msg:"Location permission not granted");
+
+
+// to end a trip
+_barikoiTraceSdkFlutterPlugin.endTrip(onSuccess:(tripid){
+    Fluttertoast.showToast( msg:"ended Trip id: $tripid");
+  }, onError: (errorCode,errorMessage){
+    Fluttertoast.showToast( msg:"Error: $errorCode, $errorMessage");
+});
 ```
 
 

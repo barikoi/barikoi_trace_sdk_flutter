@@ -10,6 +10,7 @@ import com.barikoi.barikoitrace.callback.BarikoiTraceTripStateCallback
 import com.barikoi.barikoitrace.callback.BarikoiTraceUserCallback
 import com.barikoi.barikoitrace.models.BarikoiTraceError
 import com.barikoi.barikoitrace.models.BarikoiTraceUser
+import com.barikoi.barikoitrace.models.createtrip.Trip
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -17,6 +18,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+
 
 
 /** BarikoiTraceSdkFlutterPlugin */
@@ -59,9 +61,8 @@ class BarikoiTraceSdkFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityA
                 val userPhone = call.argument("phone") ?: "Not Found"
                 activity.let {
                     if (BarikoiTrace.isOnTrip()) {
-                        Toast.makeText(it, "cannot change user mid journey!", Toast.LENGTH_SHORT)
-                            .show()
-                        result.success(true)
+                        result.error("TRIP_STATE_ERROR", "Trip already started, cannot change user midjourney", null)
+                        return
                     }
                     BarikoiTrace.setOrCreateUser(
                         userName,
@@ -71,22 +72,15 @@ class BarikoiTraceSdkFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityA
                             override fun onFailure(barikoiError: BarikoiTraceError?) {
                                 if (barikoiError != null) {
                                     result.error(barikoiError.code, barikoiError.message, null)
+                                    return
                                 }
                             }
 
                             override fun onSuccess(traceUser: BarikoiTraceUser?) {
                                 if (traceUser != null) {
-                                    result.success(traceUser.userId)
+                                    result.success(traceUser.getUserId())
+                                    return
                                 }
-                                BarikoiTrace.syncTripstate(object : BarikoiTraceTripStateCallback {
-                                    override fun onSuccess() {
-
-                                    }
-
-                                    override fun onFailure(barikoiError: BarikoiTraceError) {
-                                        Log.e("trip-state", barikoiError.message)
-                                    }
-                                })
                             }
                         })
                 }
@@ -108,6 +102,7 @@ class BarikoiTraceSdkFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityA
                     if (!BarikoiTrace.isLocationPermissionsGranted()) {
                         BarikoiTrace.requestLocationPermissions(it)
                         result.error("LOCATION_PERMISSION_DENIED", "Location permission denied", null)
+                        return
                     }
                     if (!BarikoiTrace.isLocationSettingsOn()) {
                         BarikoiTrace.requestLocationServices(it)
@@ -140,6 +135,7 @@ class BarikoiTraceSdkFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityA
                     if (!BarikoiTrace.isLocationPermissionsGranted()) {
                         BarikoiTrace.requestLocationPermissions(it)
                         result.error("LOCATION_PERMISSION_DENIED", "Location permission denied", null)
+                        return
                     }
                     if (!BarikoiTrace.isLocationSettingsOn()) {
                         BarikoiTrace.requestLocationServices(it)
@@ -153,12 +149,12 @@ class BarikoiTraceSdkFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityA
                     }
 //                    BarikoiTrace.checkAppServicePermission(it)
 
-                    BarikoiTrace.startTrip("test", mode, object : BarikoiTraceTripStateCallback() {
-                        fun onSuccess(trip: Trip) {
+                    BarikoiTrace.startTrip("test", tracemode.build(), object : BarikoiTraceTripStateCallback {
+                        override fun onSuccess(trip: Trip) {
                            result.success(trip.getTrip_id())
                         }
 
-                        fun onFailure(barikoiError: BarikoiTraceError) {
+                        override fun onFailure(barikoiError: BarikoiTraceError) {
                             result.error(barikoiError.code, barikoiError.message, null)
                         }
                     })
@@ -166,25 +162,45 @@ class BarikoiTraceSdkFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityA
             }
 
             "endTrip" -> {
-                activity.let {
-                    if (!BarikoiTrace.isOnTrip()) {
-                        result.error("TRIP_STATE_ERROR", "Trip not started", null)
-                        return
-                    }
-                    BarikoiTrace.endTrip(object : BarikoiTraceTripStateCallback() {
-                        fun onSuccess(trip: Trip) {
-                            result.success(trip.getTrip_id())
-                        }
 
-                        fun onFailure(barikoiError: BarikoiTraceError) {
-                            result.error(barikoiError.code, barikoiError.message, null)
-                        }
-                    })
+                if (!BarikoiTrace.isOnTrip()) {
+                    result.error("TRIP_STATE_ERROR", "Trip not started", null)
+                    return
                 }
+                BarikoiTrace.endTrip(object : BarikoiTraceTripStateCallback {
+                    override fun onSuccess(trip: Trip) {
+                        result.success(trip.getTrip_id())
+                    }
+
+                    override fun onFailure(barikoiError: BarikoiTraceError) {
+                        result.error(barikoiError.code, barikoiError.message, null)
+                    }
+                })
+
             }
 
-            "getUserId" -> {}
-            "getUser" -> {}
+            "getTripId" -> {
+
+                BarikoiTrace.syncTripstate(object : BarikoiTraceTripStateCallback {
+                    override fun onSuccess(trip: Trip?) {
+                        if (trip != null) {
+                            result.success(trip.getTrip_id())
+                        }else {
+                            result.success(null)
+                        }
+                    }
+
+                    override fun onFailure(barikoiError: BarikoiTraceError) {
+                        result.error(barikoiError.code, barikoiError.message, null)
+                    }
+                })
+
+            }
+
+            "getUserId" -> {
+                val userId = BarikoiTrace.getUserId()
+                result.success(userId)
+            }
             "isLocationPermissionsGranted" -> {
                 activity.let {
                     if (!BarikoiTrace.isLocationPermissionsGranted()) {

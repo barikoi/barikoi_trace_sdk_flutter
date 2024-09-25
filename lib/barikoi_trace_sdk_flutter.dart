@@ -10,13 +10,17 @@ class BarikoiTraceSdkFlutter {
     await _channel.invokeMethod('initialize',arguments);
   }
 
-  Future<void> setOrCreateUser({required String name,String? email, required String phone}) async {
+  setOrCreateUser({required String name,String? email, required String phone,   Function(String? userid)? onSuccess,   Function(String? errorCode,String? errorMessage)? onError }) async {
     var arguments = {
       'name': name,
       'email': email,
       'phone': phone
     };
-    await _channel.invokeMethod('setOrCreateUser',arguments);
+    _channel.invokeMethod('setOrCreateUser',arguments).then((userid){
+       onSuccess?.call(userid);
+      }).onError((error, stackTrace) {
+        onError?.call(error.toString(),stackTrace.toString());
+      });
   }
 
   Future<void> startTracking({int? updateInterval, int? distaceInterval, int? accuracyfilter , String? tag}) async {
@@ -33,17 +37,31 @@ class BarikoiTraceSdkFlutter {
     await _channel.invokeMethod('endTracking');
   }
 
-  Future<String> startTrip({int? updateInterval, int? distaceInterval, int? accuracyfilter , String? tag}) async {
+  startTrip({int? updateInterval, int? distaceInterval, int? accuracyfilter , String? tag,  required Function(String? tripid) onSuccess,  required Function(String? errorCode,String? errorMessage) onError }) async {
     var arguments = {
       'tag': tag,
       updateInterval: updateInterval,
       distaceInterval: distaceInterval,
       accuracyfilter: accuracyfilter
     };
-    return await _channel.invokeMethod('startTrip',arguments);
-  }
 
-  // Future<bool?> isLocationPermissionsGranted() async {
-  //   return BarikoiTraceSdkFlutterPlatform.instance.isLocationPermissionsGranted();
-  // }
+      _channel.invokeMethod('startTrip',arguments).then((tripid){
+       onSuccess(tripid);
+      }).onError((error, stackTrace) {
+        onError(error.toString(),stackTrace.toString());
+      });
+    }
+
+  endTrip({ required Function(String? tripid) onSuccess,  required Function(String? errorCode,String? errorMessage) onError }) async {
+       _channel.invokeMethod('endTrip').then((tripid){
+       onSuccess(tripid);
+      }).onError((error, stackTrace) {
+        onError(error.toString(),stackTrace.toString());
+      });
+    }
+
+  Future<String?> getUserId() async {
+    final userId = await _channel.invokeMethod<String>('getUserId');
+    return userId;
+  }
 }

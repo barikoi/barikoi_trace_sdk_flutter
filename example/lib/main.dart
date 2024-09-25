@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-
-import 'package:flutter/services.dart';
 import 'package:barikoi_trace_sdk_flutter/barikoi_trace_sdk_flutter.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 void main() {
   runApp(const MyApp());
@@ -25,19 +25,40 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> initBarikoiTrace() async {
-    await _barikoiTraceSdkFlutterPlugin.initialize(apiKey: "MjA1NDo4MjBSTUxLTEs5");
+    await _barikoiTraceSdkFlutterPlugin.initialize(apiKey: "BARIKOI_API_KEY");
   }
 
   Future<void> setOrCreateUser() async {
-    await _barikoiTraceSdkFlutterPlugin.setOrCreateUser(name: 'sakib 4', phone: '01676529696' );
+    _barikoiTraceSdkFlutterPlugin.setOrCreateUser(name: 'sakib 4', phone: 'PHONE_NUMBER',
+    onSuccess: (userid){
+      Fluttertoast.showToast( msg:"user id: $userid");
+    }, onError: (errorCode,errorMessage){
+      Fluttertoast.showToast( msg:"Error: $errorCode, $errorMessage");
+    });
   }
 
-  Future<void> startTracing() async {
-    await _barikoiTraceSdkFlutterPlugin.startTracking(tag: "test", updateInterval: 15, accuracyfilter: 100);
+  startTracing() async {
+    if( await Permission.location.request().isGranted) {
+      if(await Permission.notification.request().isGranted) {
+        _barikoiTraceSdkFlutterPlugin.startTrip(tag: "test",
+            updateInterval: 15,
+            accuracyfilter: 100,
+            onSuccess: (tripid) {
+              Fluttertoast.showToast( msg:"Trip id: $tripid");
+            },
+            onError: (errorCode, errorMessage) {
+              Fluttertoast.showToast( msg: "Error: $errorCode, $errorMessage");
+            });
+      } else Fluttertoast.showToast( msg:"Notification permission not granted");
+    }else Fluttertoast.showToast( msg:"Location permission not granted");
   }
 
-  Future<void> stopTracing() async {
-    await _barikoiTraceSdkFlutterPlugin.stopTracking();
+  stopTracing() async {
+     _barikoiTraceSdkFlutterPlugin.endTrip(onSuccess:(tripid){
+       Fluttertoast.showToast( msg:"ended Trip id: $tripid");
+    }, onError: (errorCode,errorMessage){
+       Fluttertoast.showToast( msg:"Error: $errorCode, $errorMessage");
+    });
   }
 
   @override
