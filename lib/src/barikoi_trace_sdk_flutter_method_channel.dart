@@ -113,7 +113,7 @@ class BarikoiTraceSdkFlutterAndroid extends BarikoiTraceSdkFlutterPlatform {
   /// - [accuracyfilter]: Optional accuracy filter in meters.
   /// - [tag]: Optional tag for the trip.
   @override
-  Future<void> startTrip({
+  Future<String?> startTrip({
     int? updateInterval,
     int? distaceInterval,
     int? accuracyfilter,
@@ -125,15 +125,15 @@ class BarikoiTraceSdkFlutterAndroid extends BarikoiTraceSdkFlutterPlatform {
       'distaceInterval': distaceInterval,
       'accuracyfilter': accuracyfilter,
     };
-    await _channel.invokeMethod('startTrip', arguments);
+    return await _channel.invokeMethod('startTrip', arguments);
   }
 
   /// Ends the current trip.
   ///
   /// This method calls the native method `endTrip` to stop the current trip.
   @override
-  Future<void> endTrip() async {
-    await _channel.invokeMethod('endTrip');
+  Future<String?> endTrip() async {
+    return await _channel.invokeMethod('endTrip');
   }
 
   /// Retrieves the user ID.

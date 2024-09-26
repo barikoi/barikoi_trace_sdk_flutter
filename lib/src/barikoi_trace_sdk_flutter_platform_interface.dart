@@ -68,7 +68,7 @@ abstract class BarikoiTraceSdkFlutterPlatform {
   /// - [distaceInterval]: Optional distance interval in meters.
   /// - [accuracyfilter]: Optional accuracy filter in meters.
   /// - [tag]: Optional tag for the trip.
-  Future<void> startTrip({
+  Future<String?> startTrip({
     int? updateInterval,
     int? distaceInterval,
     int? accuracyfilter,
@@ -78,7 +78,7 @@ abstract class BarikoiTraceSdkFlutterPlatform {
   /// Ends the current trip.
   ///
   /// This method must be implemented to stop the current trip.
-  Future<void> endTrip();
+  Future<String?> endTrip();
 
   /// Retrieves the user ID.
   ///

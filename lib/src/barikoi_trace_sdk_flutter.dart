@@ -112,8 +112,16 @@ class BarikoiTraceSdkFlutter {
   }
 
   /// Stops the location tracking.
-  Future<void> stopTracking() async {
-    await sdkPlatform.stopTracking();
+  Future<void> stopTracking({
+    Function(String? userId)? onSuccess,
+    Function(String? errorCode, String? errorMessage)? onError,
+  }) async {
+    try {
+      await sdkPlatform.stopTracking();
+      onSuccess?.call(await sdkPlatform.getUserId());
+    } catch (e) {
+      onError?.call('ERROR', e.toString());
+    }
   }
 
   /// Begins a trip with the specified parameters.
@@ -133,17 +141,16 @@ class BarikoiTraceSdkFlutter {
     int? distaceInterval,
     int? accuracyfilter,
     String? tag,
-    Function(String? tripId)? onSuccess,
-    Function(String? errorCode, String? errorMessage)? onError,
+    void Function(String? tripId)? onSuccess,
+    void Function(String? errorCode, String? errorMessage)? onError,
   }) async {
     try {
-      await sdkPlatform.startTrip(
-        updateInterval: updateInterval,
-        distaceInterval: distaceInterval,
-        accuracyfilter: accuracyfilter,
-        tag: tag,
-      );
-      onSuccess?.call(await sdkPlatform.getUserId());
+      final tripId = await sdkPlatform.startTrip(
+          updateInterval: updateInterval,
+          distaceInterval: distaceInterval,
+          accuracyfilter: accuracyfilter,
+          tag: tag);
+      onSuccess?.call(tripId);
     } catch (e) {
       onError?.call('ERROR', e.toString());
     }
@@ -162,8 +169,8 @@ class BarikoiTraceSdkFlutter {
     Function(String? errorCode, String? errorMessage)? onError,
   }) async {
     try {
-      await sdkPlatform.endTrip();
-      onSuccess?.call(await sdkPlatform.getUserId());
+      final tripId = await sdkPlatform.endTrip();
+      onSuccess?.call(tripId);
     } catch (e) {
       onError?.call('ERROR', e.toString());
     }
