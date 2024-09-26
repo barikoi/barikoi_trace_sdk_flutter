@@ -1,6 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:barikoi_trace_sdk_flutter/barikoi_trace_sdk_flutter_method_channel.dart';
+import 'package:barikoi_trace_sdk_flutter/src/barikoi_trace_sdk_flutter_method_channel.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
