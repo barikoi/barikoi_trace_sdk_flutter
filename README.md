@@ -10,7 +10,8 @@ To include the library in your project, add the following to your `pubspec.yaml`
 ```yaml
 dependencies:
   barikoi_trace_sdk_flutter: 
-    git: url:https://github.com/barikoi/barikoi_trace_sdk_flutter.git
+    git: 
+      url: https://github.com/barikoi/barikoi_trace_sdk_flutter.git
     ref: master
 ```
 
