@@ -18,9 +18,9 @@ class BarikoiTraceSdkFlutter {
     };
     _channel.invokeMethod('setOrCreateUser',arguments).then((userid){
        onSuccess?.call(userid);
-      }).onError((error, stackTrace) {
-        onError?.call(error.toString(),stackTrace.toString());
-      });
+      }).onError((PlatformException error, stackTrace) {
+      onError?.call(error.code,error.message);
+    });
   }
 
   Future<void> startTracking({int? updateInterval, int? distaceInterval, int? accuracyfilter , String? tag}) async {
@@ -47,17 +47,17 @@ class BarikoiTraceSdkFlutter {
 
       _channel.invokeMethod('startTrip',arguments).then((tripid){
        onSuccess(tripid);
-      }).onError((error, stackTrace) {
-        onError(error.toString(),stackTrace.toString());
+      }).onError((PlatformException error, stackTrace) {
+        onError(error.code,error.message);
       });
     }
 
   endTrip({ required Function(String? tripid) onSuccess,  required Function(String? errorCode,String? errorMessage) onError }) async {
        _channel.invokeMethod('endTrip').then((tripid){
        onSuccess(tripid);
-      }).onError((error, stackTrace) {
-        onError(error.toString(),stackTrace.toString());
-      });
+      }).onError((PlatformException error, stackTrace) {
+         onError(error.code,error.message);
+       });
     }
 
   Future<String?> getUserId() async {

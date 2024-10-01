@@ -56,9 +56,9 @@ class BarikoiTraceSdkFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityA
             }
 
             "setOrCreateUser" -> {
-                val userName = call.argument("name") ?: "Not Found"
+                val userName = call.argument("name") ?: ""
                 val userEmail = call.argument("email") ?: ""
-                val userPhone = call.argument("phone") ?: "Not Found"
+                val userPhone = call.argument("phone") ?: ""
                 activity.let {
                     if (BarikoiTrace.isOnTrip()) {
                         result.error("TRIP_STATE_ERROR", "Trip already started, cannot change user midjourney", null)
@@ -124,7 +124,7 @@ class BarikoiTraceSdkFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityA
             "startTrip" -> {
                 val tag = call.argument("tag") ?: ""
                 val updateInterval = call.argument("updateInterval") ?: 5
-                val distanceFilter = call.argument("distanceFilter") ?: 0
+                val distanceFilter = call.argument("distaceInterval") ?: 0
                 val accuracyFilter = call.argument("accuracyFilter") ?: 300
                 val tracemode = TraceMode.Builder()
                 tracemode.setUpdateInterval(updateInterval)
