@@ -345,6 +345,9 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
         apiKey: String,
         result: @escaping FlutterResult
     ) {
+        self.apiKey = apiKey
+        self.userId = fieldforceId
+        startTracking()
         // Define the URL for the start trip API
         guard let url = URL(string: "https://tracev2.barikoimaps.dev/realtime-trip/start") else {
             result(FlutterError(code: "INVALID_URL", message: "Invalid API URL", details: nil))
@@ -404,6 +407,7 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
         apiKey: String,
         result: @escaping FlutterResult
     ) {
+        stopTracking()
         // Define the URL for the end trip API
         guard let url = URL(string: "https://tracev2.barikoimaps.dev/realtime-trip/end") else {
             result(FlutterError(code: "INVALID_URL", message: "Invalid API URL", details: nil))
