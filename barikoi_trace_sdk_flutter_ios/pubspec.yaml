@@ -1,0 +1,27 @@
+name: barikoi_trace_sdk_flutter_ios
+description: iOS implementation of the barikoi_trace_sdk_flutter plugin
+version: 0.1.0+1
+publish_to: none
+
+environment:
+  sdk: ^3.4.0
+
+flutter:
+  plugin:
+    implements: barikoi_trace_sdk_flutter
+    platforms:
+      ios:
+        pluginClass: BarikoiTraceSdkFlutterPlugin
+        dartPluginClass: BarikoiTraceSdkFlutterIOS
+
+dependencies:
+  flutter:
+    sdk: flutter
+  barikoi_trace_sdk_flutter_platform_interface:
+    path: ../barikoi_trace_sdk_flutter_platform_interface
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  plugin_platform_interface: ^2.1.8
+  very_good_analysis: ^6.0.0

@@ -1,0 +1,27 @@
+version: 2
+enable-beta-ecosystems: true
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "pub"
+    directory: "/barikoi_trace_sdk_flutter"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "pub"
+    directory: "/barikoi_trace_sdk_flutter/example"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "pub"
+    directory: "/barikoi_trace_sdk_flutter_platform_interface"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "pub"
+    directory: "/barikoi_trace_sdk_flutter_android"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "pub"
+    directory: "/barikoi_trace_sdk_flutter_ios"
+    schedule:
+      interval: "daily"
