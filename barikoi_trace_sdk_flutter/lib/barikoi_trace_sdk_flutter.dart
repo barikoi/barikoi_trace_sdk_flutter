@@ -80,4 +80,46 @@ class BarikoiTraceSdkFlutter {
       apiKey: _apiKey!,
     );
   }
+
+  Future<String?> createTrip({
+    required String userId,
+    String? fieldForceId,
+  }) async {
+    if (_apiKey == null) {
+      throw Exception('SDK not initialized. API key is required.');
+    }
+    return _platform.createTrip(
+      userId: userId,
+      apiKey: _apiKey!,
+      fieldForceId: fieldForceId,
+    );
+  }
+
+  Future<String?> startTrip({
+    required String tripId,
+    required String fieldforceId,
+  }) async {
+    if (_apiKey == null) {
+      throw Exception('SDK not initialized. API key is required.');
+    }
+    return _platform.startTrip(
+      tripId: tripId,
+      apiKey: _apiKey!,
+      fieldforceId: fieldforceId,
+    );
+  }
+
+  Future<String?> endTrip({
+    required String tripId,
+    required String fieldforceId,
+  }) async {
+    if (_apiKey == null) {
+      throw Exception('SDK not initialized. API key is required.');
+    }
+    return _platform.endTrip(
+      tripId: tripId,
+      apiKey: _apiKey!,
+      fieldforceId: fieldforceId,
+    );
+  }
 }

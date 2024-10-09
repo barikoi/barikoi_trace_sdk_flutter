@@ -9,6 +9,10 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
     var bgTask: UIBackgroundTaskIdentifier = UIBackgroundTaskIdentifier.invalid
     var userId: String?
     var apiKey: String?
+    var latestLocation: CLLocation?
+    
+    // Declare locationUpdateHandler
+    var locationUpdateHandler: ((CLLocation) -> Void)?
 
     public static func register(with registrar: FlutterPluginRegistrar) {
         let methodChannel = FlutterMethodChannel(name: "barikoi_trace_sdk_flutter_ios", binaryMessenger: registrar.messenger())
@@ -22,15 +26,15 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
         case "startTracking":
-            if let args = call.arguments as? [String: Any] {
-                if let userId = args["userId"] as? String, let apiKey = args["apiKey"] as? String {
-                    self.userId = userId
-                    self.apiKey = apiKey
-                    startTracking()
-                    result("Tracking started with userId: \(userId)")
-                } else {
-                    result(FlutterError(code: "INVALID_ARGUMENT", message: "Missing userId or apiKey", details: nil))
-                }
+            if let args = call.arguments as? [String: Any],
+               let userId = args["userId"] as? String,
+               let apiKey = args["apiKey"] as? String {
+                self.userId = userId
+                self.apiKey = apiKey
+                startTracking()
+                result("Tracking started with userId: \(userId)")
+            } else {
+                result(FlutterError(code: "INVALID_ARGUMENT", message: "Missing userId or apiKey", details: nil))
             }
 
         case "getOrCreateUser":
@@ -40,10 +44,44 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
                getOrCreateUser(phoneNumber: phoneNumber, apiKey: apiKey, result: result)
             } else {
                 result(FlutterError(code: "INVALID_ARGUMENT",
+                                   message: "Missing phoneNumber or apiKey",
+                                   details: nil))
+            }
+            
+        case "createTrip":
+            if let args = call.arguments as? [String: Any],
+               let userId = args["userId"] as? String,
+               let fieldforceId = args["fieldforceId"] as? String,
+               let apiKey = args["apiKey"] as? String {
+                createTrip(userId: userId, fieldforceId: fieldforceId, apiKey: apiKey, result: result)
+            } else {
+                result(FlutterError(code: "INVALID_ARGUMENT",
                                    message: "Missing userId or apiKey",
                                    details: nil))
             }
-
+            
+        case "startTrip":
+            if let args = call.arguments as? [String: Any],
+               let tripId = args["tripId"] as? String,
+               let fieldforceId = args["fieldforceId"] as? String,
+               let apiKey = args["apiKey"] as? String {
+                startTrip(tripId: tripId, fieldforceId: fieldforceId, apiKey: apiKey, result: result)
+            } else {
+                result(FlutterError(code: "INVALID_ARGUMENT",
+                                   message: "Missing userId or apiKey",
+                                   details: nil))
+            }
+        case "endTrip":
+            if let args = call.arguments as? [String: Any],
+               let tripId = args["tripId"] as? String,
+               let fieldforceId = args["fieldforceId"] as? String,
+               let apiKey = args["apiKey"] as? String {
+                endTrip(tripId: tripId, fieldforceId: fieldforceId, apiKey: apiKey, result: result)
+            } else {
+                result(FlutterError(code: "INVALID_ARGUMENT",
+                                   message: "Missing userId or apiKey",
+                                   details: nil))
+            }
         case "stopTracking":
             stopTracking()
             result("Tracking stopped")
@@ -51,56 +89,6 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
             result(FlutterMethodNotImplemented)
         }
     }
-public func getOrCreateUser(phoneNumber: String, apiKey: String, result: @escaping FlutterResult) {
-    // Replace 'BASE_URL' with your actual base URL
-    guard let url = URL(string: "https://tracev2.barikoimaps.dev/sdk/authenticate") else {
-        result(FlutterError(code: "INVALID_URL", message: "Invalid API URL", details: nil))
-        return
-    }
-
-    // Prepare the request
-    var request = URLRequest(url: url)
-    request.httpMethod = "POST"
-    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-    // Create the request body according to the API structure
-    let requestBody: [String: Any] = ["phone": phoneNumber, "api_key": apiKey]
-
-    do {
-        request.httpBody = try JSONSerialization.data(withJSONObject: requestBody, options: [])
-    } catch {
-        result(FlutterError(code: "INVALID_REQUEST_BODY", message: "Failed to create request body", details: nil))
-        return
-    }
-
-    // Perform the network request
-    let task = URLSession.shared.dataTask(with: request) { data, response, error in
-        if let error = error {
-            result(FlutterError(code: "NETWORK_ERROR", message: "Error making request: \(error.localizedDescription)", details: nil))
-            return
-        }
-
-        // Check for a valid response
-        if let data = data {
-            do {
-                // Parse the JSON response
-                if let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
-                    // Send the response back to Flutter
-                    result(jsonResponse)
-                } else {
-                    result(FlutterError(code: "INVALID_RESPONSE", message: "Invalid response format", details: nil))
-                }
-            } catch {
-                result(FlutterError(code: "JSON_PARSING_ERROR", message: "Failed to parse JSON response", details: nil))
-            }
-        } else {
-            result(FlutterError(code: "NO_RESPONSE", message: "No response from server", details: nil))
-        }
-    }
-
-    // Start the network request
-    task.resume()
-}
 
     public func startTracking() {
         if locationManager == nil {
@@ -126,6 +114,7 @@ public func getOrCreateUser(phoneNumber: String, apiKey: String, result: @escapi
 
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
+        latestLocation = location
         let latitude = location.coordinate.latitude
         let longitude = location.coordinate.longitude
 
@@ -149,6 +138,9 @@ public func getOrCreateUser(phoneNumber: String, apiKey: String, result: @escapi
 
         // Ensure background task is started
         startBackgroundTask()
+        
+        // Call the location update handler if set
+        locationUpdateHandler?(location)
     }
 
     public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
@@ -211,8 +203,263 @@ public func getOrCreateUser(phoneNumber: String, apiKey: String, result: @escapi
 
         task.resume()
     }
+    
+    public func getOrCreateUser(phoneNumber: String, apiKey: String, result: @escaping FlutterResult) {
+        // Replace 'BASE_URL' with your actual base URL
+        guard let url = URL(string: "https://tracev2.barikoimaps.dev/sdk/authenticate") else {
+            result(FlutterError(code: "INVALID_URL", message: "Invalid API URL", details: nil))
+            return
+        }
 
-    // FlutterStreamHandler methods for location updates
+        // Prepare the request
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        // Create the request body according to the API structure
+        let requestBody: [String: Any] = ["phone": phoneNumber, "api_key": apiKey]
+
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: requestBody, options: [])
+        } catch {
+            result(FlutterError(code: "INVALID_REQUEST_BODY", message: "Failed to create request body", details: nil))
+            return
+        }
+
+        // Perform the network request
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                result(FlutterError(code: "NETWORK_ERROR", message: "Error making request: \(error.localizedDescription)", details: nil))
+                return
+            }
+
+            // Check for a valid response
+            if let data = data {
+                do {
+                    // Parse the JSON response
+                    if let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                        // Send the response back to Flutter
+                        result(jsonResponse)
+                    } else {
+                        result(FlutterError(code: "INVALID_RESPONSE", message: "Invalid response format", details: nil))
+                    }
+                } catch {
+                    result(FlutterError(code: "JSON_PARSING_ERROR", message: "Failed to parse JSON response", details: nil))
+                }
+            } else {
+                result(FlutterError(code: "NO_RESPONSE", message: "No response from server", details: nil))
+            }
+        }
+
+        // Start the network request
+        task.resume()
+    }
+
+    public func createTrip(
+        userId: String,
+        fieldforceId: String,
+        apiKey: String,
+        result: @escaping FlutterResult
+    ) {
+        let locationManager = CLLocationManager()
+        locationManager.requestWhenInUseAuthorization()
+              var currentLoc: CLLocation!
+              if(CLLocationManager.authorizationStatus() == .authorizedWhenInUse ||
+              CLLocationManager.authorizationStatus() == .authorizedAlways) {
+                 currentLoc = locationManager.location
+                 print(currentLoc.coordinate.latitude)
+                 print(currentLoc.coordinate.longitude)
+              }
+        guard let url = URL(string: "https://tracev2.barikoimaps.dev/realtime-trip/create") else {
+            result(FlutterError(code: "INVALID_URL", message: "Invalid API URL", details: nil))
+            return
+        }
+
+        // Ensure we have a valid location
+        guard let latestLocation = currentLoc else {
+            result(FlutterError(code: "LOCATION_UNAVAILABLE", message: "Current location is not available", details: nil))
+            return
+        }
+
+        let latitude = latestLocation.coordinate.latitude
+        let longitude = latestLocation.coordinate.longitude
+
+        // Prepare the request
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        // Create the request body according to the API structure
+        let requestBody: [String: Any] = [
+            "user_id": userId,
+            "fieldforce_id": fieldforceId,
+            "api_key": apiKey,
+            "latitude": String(latitude),
+            "longitude": String(longitude)
+        ]
+        
+        print(requestBody)
+
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: requestBody, options: [])
+        } catch {
+            result(FlutterError(code: "INVALID_REQUEST_BODY", message: "Failed to create request body", details: nil))
+            return
+        }
+
+        // Perform the network request
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                result(FlutterError(code: "NETWORK_ERROR", message: "Error making request: \(error.localizedDescription)", details: nil))
+                return
+            }
+            
+            // Check for a valid response
+            if let data = data {
+                if let responseString = String(data: data, encoding: .utf8) {
+                            print("Response String: \(responseString)")
+                        }
+                do {
+                    // Parse the JSON response
+                    if let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                        // Send the response back to Flutter
+                        result(jsonResponse)
+                    } else {
+                        result(FlutterError(code: "INVALID_RESPONSE", message: "Invalid response format", details: nil))
+                    }
+                } catch {
+                    result(FlutterError(code: "JSON_PARSING_ERROR", message: "Failed to parse JSON response", details: nil))
+                }
+            } else {
+                result(FlutterError(code: "NO_RESPONSE", message: "No response from server", details: nil))
+            }
+        }
+
+        // Start the network request
+        task.resume()
+    }
+    
+    public func startTrip(
+        tripId: String,
+        fieldforceId: String,
+        apiKey: String,
+        result: @escaping FlutterResult
+    ) {
+        // Define the URL for the start trip API
+        guard let url = URL(string: "https://tracev2.barikoimaps.dev/realtime-trip/start") else {
+            result(FlutterError(code: "INVALID_URL", message: "Invalid API URL", details: nil))
+            return
+        }
+
+        // Prepare the request
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        // Create the request body according to the API structure
+        let requestBody: [String: Any] = [
+            "trip_id": tripId,
+            "fieldforce_id": fieldforceId,
+            "api_key": apiKey
+        ]
+
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: requestBody, options: [])
+        } catch {
+            result(FlutterError(code: "INVALID_REQUEST_BODY", message: "Failed to create request body", details: nil))
+            return
+        }
+
+        // Perform the network request
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                result(FlutterError(code: "NETWORK_ERROR", message: "Error making request: \(error.localizedDescription)", details: nil))
+                return
+            }
+
+            // Check for a valid response
+            if let data = data {
+                do {
+                    // Parse the JSON response
+                    if let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                        result(jsonResponse)
+                    } else {
+                        result(FlutterError(code: "INVALID_RESPONSE", message: "Invalid response format", details: nil))
+                    }
+                } catch {
+                    result(FlutterError(code: "JSON_PARSING_ERROR", message: "Failed to parse JSON response", details: nil))
+                }
+            } else {
+                result(FlutterError(code: "NO_RESPONSE", message: "No response from server", details: nil))
+            }
+        }
+
+        // Start the network request
+        task.resume()
+    }
+    
+    public func endTrip(
+        tripId: String,
+        fieldforceId: String,
+        apiKey: String,
+        result: @escaping FlutterResult
+    ) {
+        // Define the URL for the end trip API
+        guard let url = URL(string: "https://tracev2.barikoimaps.dev/realtime-trip/end") else {
+            result(FlutterError(code: "INVALID_URL", message: "Invalid API URL", details: nil))
+            return
+        }
+
+        // Prepare the request
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        // Create the request body according to the API structure
+        let requestBody: [String: Any] = [
+            "trip_id": tripId,
+            "fieldforce_id": fieldforceId,
+            "api_key": apiKey
+        ]
+
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: requestBody, options: [])
+        } catch {
+            result(FlutterError(code: "INVALID_REQUEST_BODY", message: "Failed to create request body", details: nil))
+            return
+        }
+
+        // Perform the network request
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                result(FlutterError(code: "NETWORK_ERROR", message: "Error making request: \(error.localizedDescription)", details: nil))
+                return
+            }
+
+            // Check for a valid response
+            if let data = data {
+                do {
+                    // Parse the JSON response
+                    if let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                        result(jsonResponse)
+                    } else {
+                        result(FlutterError(code: "INVALID_RESPONSE", message: "Invalid response format", details: nil))
+                    }
+                } catch {
+                    result(FlutterError(code: "JSON_PARSING_ERROR", message: "Failed to parse JSON response", details: nil))
+                }
+            } else {
+                result(FlutterError(code: "NO_RESPONSE", message: "No response from server", details: nil))
+            }
+        }
+
+        // Start the network request
+        task.resume()
+    }
+
+
+    
+    // Flutter Stream Handler methods
     public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
         self.eventSink = events
         return nil

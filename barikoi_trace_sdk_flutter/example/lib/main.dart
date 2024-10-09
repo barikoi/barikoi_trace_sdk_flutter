@@ -98,7 +98,9 @@ class _HomePageState extends State<HomePage> {
               onPressed: () async {
                 if (!context.mounted) return;
                 try {
-                  await BarikoiTraceSdkFlutter.instance.stopTracking();
+                  tripId = await BarikoiTraceSdkFlutter.instance
+                      .createTrip(userId: userId!);
+                  setState(() {});
                 } catch (error) {
                   if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -116,7 +118,10 @@ class _HomePageState extends State<HomePage> {
               onPressed: () async {
                 if (!context.mounted) return;
                 try {
-                  await BarikoiTraceSdkFlutter.instance.stopTracking();
+                  await BarikoiTraceSdkFlutter.instance.startTrip(
+                    tripId: tripId!,
+                    fieldforceId: userId!,
+                  );
                 } catch (error) {
                   if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -133,7 +138,10 @@ class _HomePageState extends State<HomePage> {
               onPressed: () async {
                 if (!context.mounted) return;
                 try {
-                  await BarikoiTraceSdkFlutter.instance.stopTracking();
+                  await BarikoiTraceSdkFlutter.instance.endTrip(
+                    tripId: tripId!,
+                    fieldforceId: userId!,
+                  );
                 } catch (error) {
                   if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(

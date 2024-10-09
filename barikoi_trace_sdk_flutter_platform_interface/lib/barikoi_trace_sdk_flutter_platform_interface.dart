@@ -72,6 +72,12 @@ abstract class BarikoiTraceSdkFlutterPlatform extends PlatformInterface {
   /// This method must be implemented to halt location tracking.
   Future<void> stopTracking();
 
+  Future<String?> createTrip({
+    required String userId,
+    required String apiKey,
+    String? fieldForceId,
+  });
+
   /// Starts a trip with the specified parameters.
   ///
   /// This method must be implemented to initiate a trip.
@@ -82,16 +88,19 @@ abstract class BarikoiTraceSdkFlutterPlatform extends PlatformInterface {
   /// - [accuracyfilter]: Optional accuracy filter in meters.
   /// - [tag]: Optional tag for the trip.
   Future<String?> startTrip({
-    int? updateInterval,
-    int? distaceInterval,
-    int? accuracyfilter,
-    String? tag,
+    required String tripId,
+    required String apiKey,
+    required String fieldforceId,
   });
 
   /// Ends the current trip.
   ///
   /// This method must be implemented to stop the current trip.
-  Future<String?> endTrip();
+  Future<String?> endTrip({
+    required String tripId,
+    required String apiKey,
+    required String fieldforceId,
+  });
 
   /// Retrieves the user ID.
   ///

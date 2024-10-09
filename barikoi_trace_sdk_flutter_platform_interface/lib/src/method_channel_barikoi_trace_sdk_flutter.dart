@@ -15,7 +15,11 @@ class MethodChannelBarikoiTraceSdkFlutter
   }
 
   @override
-  Future<String?> endTrip() {
+  Future<String?> endTrip({
+    required String tripId,
+    required String apiKey,
+    String? fieldforceId,
+  }) {
     // TODO: implement endTrip
     throw UnimplementedError();
   }
@@ -50,11 +54,11 @@ class MethodChannelBarikoiTraceSdkFlutter
   }
 
   @override
-  Future<String?> startTrip(
-      {int? updateInterval,
-      int? distaceInterval,
-      int? accuracyfilter,
-      String? tag}) {
+  Future<String?> startTrip({
+    required String tripId,
+    required String apiKey,
+    String? fieldforceId,
+  }) {
     // TODO: implement startTrip
     throw UnimplementedError();
   }
@@ -62,6 +66,16 @@ class MethodChannelBarikoiTraceSdkFlutter
   @override
   Future<void> stopTracking() {
     // TODO: implement stopTracking
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<String?> createTrip({
+    required String userId,
+    required String apiKey,
+    String? fieldForceId,
+  }) {
+    // TODO: implement createTrip
     throw UnimplementedError();
   }
 }

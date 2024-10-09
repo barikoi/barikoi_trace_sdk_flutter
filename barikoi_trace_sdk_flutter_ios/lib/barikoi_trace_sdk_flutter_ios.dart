@@ -19,9 +19,17 @@ class BarikoiTraceSdkFlutterIOS extends BarikoiTraceSdkFlutterPlatform {
   }
 
   @override
-  Future<String?> endTrip() {
-    // TODO: implement endTrip
-    throw UnimplementedError();
+  Future<String?> endTrip({
+    required String tripId,
+    required String apiKey,
+    required String fieldforceId,
+  }) async {
+   await methodChannel.invokeMethod('startTrip', {
+      'tripId': tripId,
+      'fieldforceId': fieldforceId,
+      'apiKey': apiKey,
+    });
+    return "";
   }
 
   @override
@@ -64,17 +72,34 @@ class BarikoiTraceSdkFlutterIOS extends BarikoiTraceSdkFlutterPlatform {
 
   @override
   Future<String?> startTrip({
-    int? updateInterval,
-    int? distaceInterval,
-    int? accuracyfilter,
-    String? tag,
-  }) {
-    // TODO: implement startTrip
-    throw UnimplementedError();
+    required String tripId,
+    required String apiKey,
+    required String fieldforceId,
+  }) async {
+    await methodChannel.invokeMethod('startTrip', {
+      'tripId': tripId,
+      'fieldforceId': fieldforceId,
+      'apiKey': apiKey,
+    });
+    return "";
   }
 
   @override
   Future<void> stopTracking() async {
     await methodChannel.invokeMethod('stopTracking');
+  }
+
+  @override
+  Future<String?> createTrip({
+    required String userId,
+    required String apiKey,
+    String? fieldForceId,
+  }) async {
+    final trip = await methodChannel.invokeMethod('createTrip', {
+      'userId': userId,
+      'fieldforceId': fieldForceId ?? userId,
+      'apiKey': apiKey,
+    });
+    return trip['_id'] as String;
   }
 }
