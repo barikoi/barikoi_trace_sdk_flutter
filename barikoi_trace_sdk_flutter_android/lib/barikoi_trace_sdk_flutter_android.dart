@@ -32,8 +32,8 @@ class BarikoiTraceSdkFlutterAndroid extends BarikoiTraceSdkFlutterPlatform {
   }
 
   @override
-  Future<void> setOrCreateUser(
-      {required String name, String? email, required String phone}) {
+  Future<TraceUserResponse> setOrCreateUser(
+      {String? name, String? email, required String phone,required String apiKey,}) {
     // TODO: implement setOrCreateUser
     throw UnimplementedError();
   }

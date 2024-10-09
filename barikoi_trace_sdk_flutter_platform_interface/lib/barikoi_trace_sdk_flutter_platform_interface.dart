@@ -1,6 +1,8 @@
 import 'package:barikoi_trace_sdk_flutter_platform_interface/src/method_channel_barikoi_trace_sdk_flutter.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
+part 'src/model/trace_user.dart';
+
 /// The interface that implementations of barikoi_trace_sdk_flutter must implement.
 ///
 /// Platform implementations should extend this class
@@ -40,10 +42,11 @@ abstract class BarikoiTraceSdkFlutterPlatform extends PlatformInterface {
   /// - [name]: The name of the user.
   /// - [email]: Optional email of the user.
   /// - [phone]: The phone number of the user.
-  Future<void> setOrCreateUser({
-    required String name,
+  Future<TraceUserResponse> setOrCreateUser({
+    String? name,
     String? email,
     required String phone,
+    required String apiKey,
   });
 
   /// Starts tracking the user's location with the specified parameters.

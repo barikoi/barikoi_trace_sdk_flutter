@@ -23,6 +23,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  String? userid;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,8 +37,32 @@ class _HomePageState extends State<HomePage> {
               onPressed: () async {
                 if (!context.mounted) return;
                 try {
-                  BarikoiTraceSdkFlutter.instance
-                      .startTracking(userId: '65a3cba29f7b07fa47054fb2');
+                  final user = await BarikoiTraceSdkFlutter.instance
+                      .setOrCreateUser(name: "test", phone: "01676529696");
+
+                  print(user.user.id);
+                  userid = user.user.id;
+                  setState(() {});
+                } catch (error) {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      backgroundColor: Theme.of(context).primaryColor,
+                      content: Text('$error'),
+                    ),
+                  );
+                }
+              },
+              child: const Text('Set or Create User'),
+            ),
+            Text('User Id: $userid'),
+            const Divider(),
+            ElevatedButton(
+              onPressed: () async {
+                if (!context.mounted) return;
+                try {
+                  await BarikoiTraceSdkFlutter.instance
+                      .startTracking(userId: userid ?? '');
                 } catch (error) {
                   if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -53,7 +79,7 @@ class _HomePageState extends State<HomePage> {
               onPressed: () async {
                 if (!context.mounted) return;
                 try {
-                  BarikoiTraceSdkFlutter.instance.stopTracking();
+                  await BarikoiTraceSdkFlutter.instance.stopTracking();
                 } catch (error) {
                   if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(

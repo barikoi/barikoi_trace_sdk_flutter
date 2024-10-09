@@ -31,10 +31,21 @@ class BarikoiTraceSdkFlutterIOS extends BarikoiTraceSdkFlutterPlatform {
   }
 
   @override
-  Future<void> setOrCreateUser(
-      {required String name, String? email, required String phone}) {
-    // TODO: implement setOrCreateUser
-    throw UnimplementedError();
+  Future<TraceUserResponse> setOrCreateUser({
+    String? name,
+    String? email,
+    required String phone,
+    required String apiKey,
+  }) async {
+    final user = await methodChannel.invokeMethod('getOrCreateUser', {
+      'phoneNumber': phone,
+      'apiKey': apiKey,
+    });
+    return TraceUserResponse.fromJson({
+      'user': {
+        '_id': user['user']['_id'],
+      },
+    });
   }
 
   @override
@@ -52,11 +63,12 @@ class BarikoiTraceSdkFlutterIOS extends BarikoiTraceSdkFlutterPlatform {
   }
 
   @override
-  Future<String?> startTrip(
-      {int? updateInterval,
-      int? distaceInterval,
-      int? accuracyfilter,
-      String? tag}) {
+  Future<String?> startTrip({
+    int? updateInterval,
+    int? distaceInterval,
+    int? accuracyfilter,
+    String? tag,
+  }) {
     // TODO: implement startTrip
     throw UnimplementedError();
   }

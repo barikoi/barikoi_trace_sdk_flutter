@@ -32,6 +32,18 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
                     result(FlutterError(code: "INVALID_ARGUMENT", message: "Missing userId or apiKey", details: nil))
                 }
             }
+
+        case "getOrCreateUser":
+            if let args = call.arguments as? [String: Any],
+               let phoneNumber = args["phoneNumber"] as? String,
+               let apiKey = args["apiKey"] as? String {
+               getOrCreateUser(phoneNumber: phoneNumber, apiKey: apiKey, result: result)
+            } else {
+                result(FlutterError(code: "INVALID_ARGUMENT",
+                                   message: "Missing userId or apiKey",
+                                   details: nil))
+            }
+
         case "stopTracking":
             stopTracking()
             result("Tracking stopped")
@@ -39,6 +51,56 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
             result(FlutterMethodNotImplemented)
         }
     }
+public func getOrCreateUser(phoneNumber: String, apiKey: String, result: @escaping FlutterResult) {
+    // Replace 'BASE_URL' with your actual base URL
+    guard let url = URL(string: "https://tracev2.barikoimaps.dev/sdk/authenticate") else {
+        result(FlutterError(code: "INVALID_URL", message: "Invalid API URL", details: nil))
+        return
+    }
+
+    // Prepare the request
+    var request = URLRequest(url: url)
+    request.httpMethod = "POST"
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+    // Create the request body according to the API structure
+    let requestBody: [String: Any] = ["phone": phoneNumber, "api_key": apiKey]
+
+    do {
+        request.httpBody = try JSONSerialization.data(withJSONObject: requestBody, options: [])
+    } catch {
+        result(FlutterError(code: "INVALID_REQUEST_BODY", message: "Failed to create request body", details: nil))
+        return
+    }
+
+    // Perform the network request
+    let task = URLSession.shared.dataTask(with: request) { data, response, error in
+        if let error = error {
+            result(FlutterError(code: "NETWORK_ERROR", message: "Error making request: \(error.localizedDescription)", details: nil))
+            return
+        }
+
+        // Check for a valid response
+        if let data = data {
+            do {
+                // Parse the JSON response
+                if let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                    // Send the response back to Flutter
+                    result(jsonResponse)
+                } else {
+                    result(FlutterError(code: "INVALID_RESPONSE", message: "Invalid response format", details: nil))
+                }
+            } catch {
+                result(FlutterError(code: "JSON_PARSING_ERROR", message: "Failed to parse JSON response", details: nil))
+            }
+        } else {
+            result(FlutterError(code: "NO_RESPONSE", message: "No response from server", details: nil))
+        }
+    }
+
+    // Start the network request
+    task.resume()
+}
 
     public func startTracking() {
         if locationManager == nil {

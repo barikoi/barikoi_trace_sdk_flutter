@@ -53,17 +53,31 @@ class BarikoiTraceSdkFlutter {
     return _instance!;
   }
 
-  startTracking({required String userId}) {
+  Future<void> startTracking({required String userId}) async {
     if (_apiKey == null) {
       throw Exception('SDK not initialized. API key is required.');
     }
-    _platform.startTracking(userId: userId, apiKey: _apiKey!);
+    await _platform.startTracking(userId: userId, apiKey: _apiKey!);
   }
 
-  stopTracking() {
+  Future<void> stopTracking() async {
     if (_apiKey == null) {
       throw Exception('SDK not initialized. API key is required.');
     }
-    _platform.stopTracking();
+    await _platform.stopTracking();
+  }
+
+  Future<TraceUserResponse> setOrCreateUser({
+    required String name,
+    required String phone,
+  }) async {
+    if (_apiKey == null) {
+      throw Exception('SDK not initialized. API key is required.');
+    }
+    return _platform.setOrCreateUser(
+      name: name,
+      phone: phone,
+      apiKey: _apiKey!,
+    );
   }
 }
