@@ -2,7 +2,7 @@ import 'package:barikoi_trace_sdk_flutter/barikoi_trace_sdk_flutter.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  BarikoiTraceSdkFlutter(apiKey: 'YOUR_API_KEY');
+  BarikoiTraceSdkFlutter(apiKey: 'MjA1NDo4MjBSTUxLTEs5');
   runApp(const MyApp());
 }
 
@@ -23,7 +23,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String? userid;
+  String? userId;
+  String? tripId;
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +42,7 @@ class _HomePageState extends State<HomePage> {
                       .setOrCreateUser(name: "test", phone: "01676529696");
 
                   print(user.user.id);
-                  userid = user.user.id;
+                  userId = user.user.id;
                   setState(() {});
                 } catch (error) {
                   if (!context.mounted) return;
@@ -55,14 +56,14 @@ class _HomePageState extends State<HomePage> {
               },
               child: const Text('Set or Create User'),
             ),
-            Text('User Id: $userid'),
+            Text('User Id: $userId'),
             const Divider(),
             ElevatedButton(
               onPressed: () async {
                 if (!context.mounted) return;
                 try {
                   await BarikoiTraceSdkFlutter.instance
-                      .startTracking(userId: userid ?? '');
+                      .startTracking(userId: userId ?? '');
                 } catch (error) {
                   if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -92,7 +93,59 @@ class _HomePageState extends State<HomePage> {
               },
               child: const Text('Stop Tracking'),
             ),
-            const Divider()
+            const Divider(),
+            ElevatedButton(
+              onPressed: () async {
+                if (!context.mounted) return;
+                try {
+                  await BarikoiTraceSdkFlutter.instance.stopTracking();
+                } catch (error) {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      backgroundColor: Theme.of(context).primaryColor,
+                      content: Text('$error'),
+                    ),
+                  );
+                }
+              },
+              child: const Text('Create Trip'),
+            ),
+            Text('Trip Id: $tripId'),
+            ElevatedButton(
+              onPressed: () async {
+                if (!context.mounted) return;
+                try {
+                  await BarikoiTraceSdkFlutter.instance.stopTracking();
+                } catch (error) {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      backgroundColor: Theme.of(context).primaryColor,
+                      content: Text('$error'),
+                    ),
+                  );
+                }
+              },
+              child: const Text('Start Trip'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (!context.mounted) return;
+                try {
+                  await BarikoiTraceSdkFlutter.instance.stopTracking();
+                } catch (error) {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      backgroundColor: Theme.of(context).primaryColor,
+                      content: Text('$error'),
+                    ),
+                  );
+                }
+              },
+              child: const Text('End Trip'),
+            ),
           ],
         ),
       ),

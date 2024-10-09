@@ -122,18 +122,30 @@ public func getOrCreateUser(phoneNumber: String, apiKey: String, result: @escapi
         locationManager?.stopMonitoringSignificantLocationChanges()
     }
 
+    var lastSentTime: Date?
+
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
         let latitude = location.coordinate.latitude
         let longitude = location.coordinate.longitude
 
-        // Send location to the server
-        sendLocationToServer(latitude: latitude, longitude: longitude)
-
         // Send location updates to Flutter
         if let eventSink = eventSink {
             eventSink(["latitude": latitude, "longitude": longitude])
         }
+
+        // Ensure that at least 5 seconds have passed since the last API request
+        let currentTime = Date()
+        if let lastTime = lastSentTime {
+            let timeInterval = currentTime.timeIntervalSince(lastTime)
+            if timeInterval < 6 {
+                return
+            }
+        }
+
+        // Update the last sent time and send the location to the server
+        lastSentTime = currentTime
+        sendLocationToServer(latitude: latitude, longitude: longitude)
 
         // Ensure background task is started
         startBackgroundTask()
