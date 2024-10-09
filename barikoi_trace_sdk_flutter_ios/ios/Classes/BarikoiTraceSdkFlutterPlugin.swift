@@ -91,19 +91,28 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
     }
 
     public func startTracking() {
-        if locationManager == nil {
-            locationManager = CLLocationManager()
+            // Re-initialize the location manager every time startTracking is called
+            if locationManager == nil {
+                locationManager = CLLocationManager()
+            }
             locationManager?.delegate = self
 
+            // Request the necessary permissions
             locationManager?.requestWhenInUseAuthorization()
             locationManager?.requestAlwaysAuthorization()
+
+            // Ensure the location manager is set up to handle location updates
             locationManager?.startUpdatingLocation()
             locationManager?.startMonitoringSignificantLocationChanges()
 
+            // Enable background location updates
             locationManager?.allowsBackgroundLocationUpdates = true
             locationManager?.pausesLocationUpdatesAutomatically = false
+
+            // Start a new background task
+            startBackgroundTask()
         }
-    }
+
 
     public func stopTracking() {
         locationManager?.stopUpdatingLocation()
