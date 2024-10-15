@@ -7,11 +7,13 @@ void main() {
   const kPlatformName = 'platformName';
 
   group('$MethodChannelBarikoiTraceSdkFlutter', () {
-    late MethodChannelBarikoiTraceSdkFlutter methodChannelBarikoiTraceSdkFlutter;
+    late MethodChannelBarikoiTraceSdkFlutter
+        methodChannelBarikoiTraceSdkFlutter;
     final log = <MethodCall>[];
 
     setUp(() async {
-      methodChannelBarikoiTraceSdkFlutter = MethodChannelBarikoiTraceSdkFlutter();
+      methodChannelBarikoiTraceSdkFlutter =
+          MethodChannelBarikoiTraceSdkFlutter();
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(
         methodChannelBarikoiTraceSdkFlutter.methodChannel,
@@ -30,7 +32,8 @@ void main() {
     tearDown(log.clear);
 
     test('getPlatformName', () async {
-      final platformName = await methodChannelBarikoiTraceSdkFlutter.getPlatformName();
+      final platformName =
+          await methodChannelBarikoiTraceSdkFlutter.getPlatformName();
       expect(
         log,
         <Matcher>[isMethodCall('getPlatformName', arguments: null)],

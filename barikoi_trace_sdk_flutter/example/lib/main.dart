@@ -40,7 +40,7 @@ class _HomePageState extends State<HomePage> {
                 if (!context.mounted) return;
                 try {
                   final user = await BarikoiTraceSdkFlutter.instance
-                      .setOrCreateUser(name: "test", phone: "01676529696");
+                      .setOrCreateUser(name: 'test', phone: '01676529696');
 
                   print(user.user.id);
                   userId = user.user.id;

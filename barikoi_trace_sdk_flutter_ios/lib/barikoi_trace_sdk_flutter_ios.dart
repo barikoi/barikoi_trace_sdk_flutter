@@ -24,7 +24,7 @@ class BarikoiTraceSdkFlutterIOS extends BarikoiTraceSdkFlutterPlatform {
     required String apiKey,
     required String fieldforceId,
   }) async {
-   await methodChannel.invokeMethod('startTrip', {
+    await methodChannel.invokeMethod('startTrip', {
       'tripId': tripId,
       'fieldforceId': fieldforceId,
       'apiKey': apiKey,

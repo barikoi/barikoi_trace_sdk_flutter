@@ -16,7 +16,8 @@ void main() {
 
       log = <MethodCall>[];
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(barikoiTraceSdkFlutter.methodChannel, (methodCall) async {
+          .setMockMethodCallHandler(barikoiTraceSdkFlutter.methodChannel,
+              (methodCall) async {
         log.add(methodCall);
         switch (methodCall.method) {
           case 'getPlatformName':
@@ -29,7 +30,8 @@ void main() {
 
     test('can be registered', () {
       BarikoiTraceSdkFlutterAndroid.registerWith();
-      expect(BarikoiTraceSdkFlutterPlatform.instance, isA<BarikoiTraceSdkFlutterAndroid>());
+      expect(BarikoiTraceSdkFlutterPlatform.instance,
+          isA<BarikoiTraceSdkFlutterAndroid>());
     });
 
     test('getPlatformName returns correct name', () async {

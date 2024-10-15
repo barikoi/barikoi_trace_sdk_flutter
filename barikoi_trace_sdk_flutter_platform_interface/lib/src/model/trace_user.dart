@@ -1,4 +1,5 @@
 part of '../../barikoi_trace_sdk_flutter_platform_interface.dart';
+
 class TraceUserResponse {
   User user;
 
@@ -13,8 +14,8 @@ class TraceUserResponse {
   }
 
   Map<String, dynamic> toJson() => {
-    "user": user.toJson(),
-  };
+        "user": user.toJson(),
+      };
 }
 
 class User {
@@ -31,7 +32,6 @@ class User {
   }
 
   Map<String, dynamic> toJson() => {
-    "_id": id, // Only serialize _id
-  };
+        "_id": id, // Only serialize _id
+      };
 }
-
