@@ -34,6 +34,8 @@ abstract class BarikoiTraceSdkFlutterPlatform extends PlatformInterface {
   /// Return the current platform name.
   Future<String?> getPlatformName();
 
+  void intAndroidSdk(String apiKey);
+
   /// Sets or creates a user with the provided details.
   ///
   /// This method must be implemented to manage user creation or updating.
@@ -91,6 +93,10 @@ abstract class BarikoiTraceSdkFlutterPlatform extends PlatformInterface {
     required String tripId,
     required String apiKey,
     required String fieldforceId,
+    int? updateInterval,
+    int? distaceInterval,
+    int? accuracyfilter,
+    String? tag,
   });
 
   /// Ends the current trip.

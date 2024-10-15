@@ -2,6 +2,7 @@ import 'package:barikoi_trace_sdk_flutter/barikoi_trace_sdk_flutter.dart';
 import 'package:flutter/material.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   BarikoiTraceSdkFlutter(apiKey: 'MjA1NDo4MjBSTUxLTEs5');
   runApp(const MyApp());
 }

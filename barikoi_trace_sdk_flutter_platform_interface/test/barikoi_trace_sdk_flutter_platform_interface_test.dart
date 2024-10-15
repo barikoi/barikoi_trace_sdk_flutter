@@ -47,6 +47,10 @@ class BarikoiTraceSdkFlutterMock extends BarikoiTraceSdkFlutterPlatform {
     required String tripId,
     required String apiKey,
     String? fieldforceId,
+    int? updateInterval,
+    int? distaceInterval,
+    int? accuracyfilter,
+    String? tag,
   }) {
     // TODO: implement startTrip
     throw UnimplementedError();
@@ -66,6 +70,11 @@ class BarikoiTraceSdkFlutterMock extends BarikoiTraceSdkFlutterPlatform {
   }) {
     // TODO: implement createTrip
     throw UnimplementedError();
+  }
+
+  @override
+  void intAndroidSdk(String apiKey) {
+    // TODO: implement intAndroidSdk
   }
 }
 

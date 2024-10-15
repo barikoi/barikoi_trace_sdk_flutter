@@ -75,6 +75,10 @@ class BarikoiTraceSdkFlutterIOS extends BarikoiTraceSdkFlutterPlatform {
     required String tripId,
     required String apiKey,
     required String fieldforceId,
+    int? updateInterval,
+    int? distaceInterval,
+    int? accuracyfilter,
+    String? tag,
   }) async {
     await methodChannel.invokeMethod('startTrip', {
       'tripId': tripId,
@@ -101,5 +105,10 @@ class BarikoiTraceSdkFlutterIOS extends BarikoiTraceSdkFlutterPlatform {
       'apiKey': apiKey,
     });
     return trip['_id'] as String;
+  }
+
+  @override
+  void intAndroidSdk(String apiKey) {
+    // TODO: implement intAndroidSdk
   }
 }

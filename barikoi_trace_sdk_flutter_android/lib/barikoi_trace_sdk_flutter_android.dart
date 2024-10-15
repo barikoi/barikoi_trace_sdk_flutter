@@ -20,38 +20,68 @@ class BarikoiTraceSdkFlutterAndroid extends BarikoiTraceSdkFlutterPlatform {
   }
 
   @override
+  void intAndroidSdk(String apiKey) {
+    methodChannel.invokeMethod('initialize', {
+      'apiKey': apiKey,
+    });
+  }
+
+  @override
   Future<String?> endTrip({
     required String tripId,
     required String apiKey,
     String? fieldforceId,
-  }) {
-    // TODO: implement endTrip
-    throw UnimplementedError();
+  }) async {
+    return methodChannel.invokeMethod('endTrip');
   }
 
   @override
-  Future<String?> getUserId() {
-    // TODO: implement getUserId
-    throw UnimplementedError();
+  Future<String?> getUserId() async {
+    return methodChannel.invokeMethod<String>('getUserId');
   }
 
   @override
-  Future<TraceUserResponse> setOrCreateUser(
-      {String? name, String? email, required String phone,required String apiKey,}) {
-    // TODO: implement setOrCreateUser
-    throw UnimplementedError();
+  Future<TraceUserResponse> setOrCreateUser({
+    required String phone,
+    required String apiKey,
+    String? name,
+    String? email,
+  }) async {
+    final arguments = {
+      'name': name,
+      'email': email,
+      'phone': phone,
+    };
+    String? uid = '';
+    try {
+      await methodChannel.invokeMethod('setOrCreateUser', arguments);
+    } on PlatformException catch (e) {
+      debugPrint('User ID: $uid');
+      debugPrint(e.toString());
+    }
+    uid = await methodChannel.invokeMethod<String>('getUserId');
+
+    return TraceUserResponse(
+      user: User(id: uid ?? '1'),
+    );
   }
 
   @override
-  Future<void> startTracking(
-      {int? updateInterval,
-      int? distaceInterval,
-      int? accuracyfilter,
-      String? tag,
-      required String userId,
-      required String apiKey}) {
-    // TODO: implement startTracking
-    throw UnimplementedError();
+  Future<void> startTracking({
+    required String userId,
+    required String apiKey,
+    int? updateInterval,
+    int? distaceInterval,
+    int? accuracyfilter,
+    String? tag,
+  }) async {
+    final arguments = {
+      'tag': tag,
+      updateInterval: updateInterval,
+      distaceInterval: distaceInterval,
+      accuracyfilter: accuracyfilter,
+    };
+    await methodChannel.invokeMethod('startTracking', arguments);
   }
 
   @override
@@ -59,15 +89,23 @@ class BarikoiTraceSdkFlutterAndroid extends BarikoiTraceSdkFlutterPlatform {
     required String tripId,
     required String apiKey,
     String? fieldforceId,
-  }) {
-    // TODO: implement startTrip
-    throw UnimplementedError();
+    int? updateInterval,
+    int? distaceInterval,
+    int? accuracyfilter,
+    String? tag,
+  }) async {
+    final arguments = {
+      'tag': tag,
+      'updateInterval': updateInterval,
+      'distaceInterval': distaceInterval,
+      'accuracyfilter': accuracyfilter,
+    };
+    return methodChannel.invokeMethod('startTrip', arguments);
   }
 
   @override
-  Future<void> stopTracking() {
-    // TODO: implement stopTracking
-    throw UnimplementedError();
+  Future<void> stopTracking() async {
+    await methodChannel.invokeMethod('endTracking');
   }
 
   @override

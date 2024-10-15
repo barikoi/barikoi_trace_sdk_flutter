@@ -58,6 +58,10 @@ class MethodChannelBarikoiTraceSdkFlutter
     required String tripId,
     required String apiKey,
     String? fieldforceId,
+    int? updateInterval,
+    int? distaceInterval,
+    int? accuracyfilter,
+    String? tag,
   }) {
     // TODO: implement startTrip
     throw UnimplementedError();
@@ -77,5 +81,10 @@ class MethodChannelBarikoiTraceSdkFlutter
   }) {
     // TODO: implement createTrip
     throw UnimplementedError();
+  }
+
+  @override
+  void intAndroidSdk(String apiKey) {
+    // TODO: implement intAndroidSdk
   }
 }

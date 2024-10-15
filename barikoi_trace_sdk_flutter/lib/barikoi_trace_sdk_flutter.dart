@@ -1,4 +1,5 @@
 import 'package:barikoi_trace_sdk_flutter_platform_interface/barikoi_trace_sdk_flutter_platform_interface.dart';
+import 'dart:io' show Platform;
 
 BarikoiTraceSdkFlutterPlatform get _platform =>
     BarikoiTraceSdkFlutterPlatform.instance;
@@ -41,6 +42,11 @@ class BarikoiTraceSdkFlutter {
   factory BarikoiTraceSdkFlutter({required String apiKey}) {
     _apiKey = apiKey;
     _instance ??= BarikoiTraceSdkFlutter._(apiKey: apiKey);
+
+    // init android sdk
+    if (Platform.isAndroid) {
+      _platform.intAndroidSdk(apiKey);
+    }
     // Return the singleton instance
     return _instance!;
   }
@@ -98,6 +104,10 @@ class BarikoiTraceSdkFlutter {
   Future<String?> startTrip({
     required String tripId,
     required String fieldforceId,
+    int? updateInterval, // todo
+    int? distaceInterval, // todo
+    int? accuracyfilter, // todo
+    String? tag,
   }) async {
     if (_apiKey == null) {
       throw Exception('SDK not initialized. API key is required.');
@@ -106,6 +116,9 @@ class BarikoiTraceSdkFlutter {
       tripId: tripId,
       apiKey: _apiKey!,
       fieldforceId: fieldforceId,
+      accuracyfilter: accuracyfilter,
+      distaceInterval: distaceInterval,
+      updateInterval: updateInterval,
     );
   }
 

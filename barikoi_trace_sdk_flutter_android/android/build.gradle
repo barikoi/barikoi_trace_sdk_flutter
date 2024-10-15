@@ -10,6 +10,7 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        maven { url 'https://jitpack.io' }
     }
 }
 
@@ -39,6 +40,7 @@ android {
     }
 
     dependencies {
+        implementation 'com.github.barikoi:barikoitrace-android-sdk:5692346ca6'
         testImplementation 'org.jetbrains.kotlin:kotlin-test'
         testImplementation 'org.mockito:mockito-core:5.0.0'
     }
