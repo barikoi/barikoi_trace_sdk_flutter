@@ -28,9 +28,8 @@ class BarikoiTraceSdkFlutterAndroid extends BarikoiTraceSdkFlutterPlatform {
 
   @override
   Future<String?> endTrip({
-    required String tripId,
+    required String userId,
     required String apiKey,
-    String? fieldforceId,
   }) async {
     return methodChannel.invokeMethod('endTrip');
   }
@@ -46,6 +45,7 @@ class BarikoiTraceSdkFlutterAndroid extends BarikoiTraceSdkFlutterPlatform {
     required String apiKey,
     String? name,
     String? email,
+
   }) async {
     final arguments = {
       'name': name,
@@ -86,9 +86,8 @@ class BarikoiTraceSdkFlutterAndroid extends BarikoiTraceSdkFlutterPlatform {
 
   @override
   Future<String?> startTrip({
-    required String tripId,
     required String apiKey,
-    String? fieldforceId,
+    required String userId,
     int? updateInterval,
     int? distaceInterval,
     int? accuracyfilter,

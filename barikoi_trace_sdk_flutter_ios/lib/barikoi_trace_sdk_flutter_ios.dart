@@ -20,16 +20,14 @@ class BarikoiTraceSdkFlutterIOS extends BarikoiTraceSdkFlutterPlatform {
 
   @override
   Future<String?> endTrip({
-    required String tripId,
+    required String userId,
     required String apiKey,
-    required String fieldforceId,
   }) async {
-    await methodChannel.invokeMethod('startTrip', {
-      'tripId': tripId,
-      'fieldforceId': fieldforceId,
+    await methodChannel.invokeMethod('endTrip', {
+      'userId': userId,
       'apiKey': apiKey,
     });
-    return "";
+    return "1";
   }
 
   @override
@@ -40,10 +38,8 @@ class BarikoiTraceSdkFlutterIOS extends BarikoiTraceSdkFlutterPlatform {
 
   @override
   Future<TraceUserResponse> setOrCreateUser({
-    String? name,
+    required String phone, required String apiKey, String? name,
     String? email,
-    required String phone,
-    required String apiKey,
   }) async {
     final user = await methodChannel.invokeMethod('getOrCreateUser', {
       'phoneNumber': phone,
@@ -58,12 +54,10 @@ class BarikoiTraceSdkFlutterIOS extends BarikoiTraceSdkFlutterPlatform {
 
   @override
   Future<void> startTracking(
-      {int? updateInterval,
+      {required String userId, required String apiKey, int? updateInterval,
       int? distaceInterval,
       int? accuracyfilter,
-      String? tag,
-      required String userId,
-      required String apiKey}) async {
+      String? tag}) async {
     await methodChannel.invokeMethod<String>('startTracking', {
       'userId': userId,
       'apiKey': apiKey,
@@ -72,17 +66,16 @@ class BarikoiTraceSdkFlutterIOS extends BarikoiTraceSdkFlutterPlatform {
 
   @override
   Future<String?> startTrip({
-    required String tripId,
     required String apiKey,
-    required String fieldforceId,
+    required String userId,
     int? updateInterval,
     int? distaceInterval,
     int? accuracyfilter,
     String? tag,
   }) async {
     await methodChannel.invokeMethod('startTrip', {
-      'tripId': tripId,
-      'fieldforceId': fieldforceId,
+      'tag': tag,
+      'user_id': userId,
       'apiKey': apiKey,
     });
     return "";

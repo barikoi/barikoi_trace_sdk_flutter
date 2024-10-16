@@ -1,6 +1,7 @@
 import Flutter
 import UIKit
 import CoreLocation
+import Foundation
 
 public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationManagerDelegate, FlutterStreamHandler {
 
@@ -62,10 +63,10 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
             
         case "startTrip":
             if let args = call.arguments as? [String: Any],
-               let tripId = args["tripId"] as? String,
-               let fieldforceId = args["fieldforceId"] as? String,
+               let tag = args["tag"] as? String,
+               let userId = args["user_id"] as? String,
                let apiKey = args["apiKey"] as? String {
-                startTrip(tripId: tripId, fieldforceId: fieldforceId, apiKey: apiKey, result: result)
+                startTrip(tag:tag,apiKey: apiKey, userId: userId,result: result)
             } else {
                 result(FlutterError(code: "INVALID_ARGUMENT",
                                    message: "Missing userId or apiKey",
@@ -73,10 +74,9 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
             }
         case "endTrip":
             if let args = call.arguments as? [String: Any],
-               let tripId = args["tripId"] as? String,
-               let fieldforceId = args["fieldforceId"] as? String,
+               let userId = args["userId"] as? String,
                let apiKey = args["apiKey"] as? String {
-                endTrip(tripId: tripId, fieldforceId: fieldforceId, apiKey: apiKey, result: result)
+                endTrip(userId: userId, apiKey: apiKey, result: result)
             } else {
                 result(FlutterError(code: "INVALID_ARGUMENT",
                                    message: "Missing userId or apiKey",
@@ -85,6 +85,16 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
         case "stopTracking":
             stopTracking()
             result("Tracking stopped")
+        case "getCurrentTrip":
+                   if let args = call.arguments as? [String: Any],
+                      let userId = args["userId"] as? String,
+                      let apiKey = args["apiKey"] as? String {
+                       getCurrentTrip(apiKey: apiKey, userId: userId, result: result)
+                   } else {
+                       result(FlutterError(code: "INVALID_ARGUMENT",
+                                          message: "Missing userId or apiKey",
+                                          details: nil))
+                   }
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -174,9 +184,11 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
             return
         }
 
-        let gpxTime = DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .medium)
+        // Use ISO 8601 format for gpx_time
+        let gpxTimeFormatter = ISO8601DateFormatter()
+        let gpxTime = gpxTimeFormatter.string(from: Date())
 
-        let url = URL(string: "https://tracev2.barikoimaps.dev/sdk/add-gpx")!
+        let url = URL(string: Api.gpxUrl)!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -189,7 +201,7 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
             "altitude": 50,
             "speed": 10,
             "bearing": 299,
-            "gpx_time": gpxTime,
+            "gpx_time": gpxTime,  // Use the formatted gpxTime
             "api_key": apiKey
         ]
 
@@ -212,10 +224,11 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
 
         task.resume()
     }
+
     
     public func getOrCreateUser(phoneNumber: String, apiKey: String, result: @escaping FlutterResult) {
         // Replace 'BASE_URL' with your actual base URL
-        guard let url = URL(string: "https://tracev2.barikoimaps.dev/sdk/authenticate") else {
+        guard let url = URL(string: Api.createUserUrl) else {
             result(FlutterError(code: "INVALID_URL", message: "Invalid API URL", details: nil))
             return
         }
@@ -349,16 +362,23 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
     }
     
     public func startTrip(
-        tripId: String,
-        fieldforceId: String,
+        tag: String?,
         apiKey: String,
+        userId: String,
         result: @escaping FlutterResult
     ) {
         self.apiKey = apiKey
-        self.userId = fieldforceId
+        self.userId = userId
         startTracking()
+
+        // Use ISO 8601 format for gpx_time
+       let gpxTimeFormatter = ISO8601DateFormatter()
+       gpxTimeFormatter.timeZone = TimeZone(secondsFromGMT: 6 * 3600) // UTC+6 offset
+       let gpxTime = gpxTimeFormatter.string(from: Date())
+
+        print(gpxTime)
         // Define the URL for the start trip API
-        guard let url = URL(string: "https://tracev2.barikoimaps.dev/realtime-trip/start") else {
+        guard let url = URL(string: Api.startTripUrl) else {
             result(FlutterError(code: "INVALID_URL", message: "Invalid API URL", details: nil))
             return
         }
@@ -369,11 +389,14 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         // Create the request body according to the API structure
-        let requestBody: [String: Any] = [
-            "trip_id": tripId,
-            "fieldforce_id": fieldforceId,
-            "api_key": apiKey
+        var requestBody: [String: Any] = [
+            "api_key": apiKey,
+            "user_id": userId,
+            "start_time": gpxTime
         ]
+        if let tag = tag {
+            requestBody["tag"] = tag
+        }
 
         do {
             request.httpBody = try JSONSerialization.data(withJSONObject: requestBody, options: [])
@@ -409,16 +432,25 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
         // Start the network request
         task.resume()
     }
+
     
     public func endTrip(
-        tripId: String,
-        fieldforceId: String,
+        userId: String,
         apiKey: String,
         result: @escaping FlutterResult
     ) {
+        // Stop tracking before ending the trip
         stopTracking()
+
+        // Use ISO 8601 format for end_time
+       let isoDateFormatter = ISO8601DateFormatter()
+       isoDateFormatter.timeZone = TimeZone(secondsFromGMT: 6 * 3600) // UTC+6 offset
+       let endTime = isoDateFormatter.string(from: Date())
+
+        
+        print(endTime)
         // Define the URL for the end trip API
-        guard let url = URL(string: "https://tracev2.barikoimaps.dev/realtime-trip/end") else {
+        guard let url = URL(string: Api.endTripUrl) else {
             result(FlutterError(code: "INVALID_URL", message: "Invalid API URL", details: nil))
             return
         }
@@ -430,9 +462,9 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
 
         // Create the request body according to the API structure
         let requestBody: [String: Any] = [
-            "trip_id": tripId,
-            "fieldforce_id": fieldforceId,
-            "api_key": apiKey
+            "api_key": apiKey,
+            "user_id": userId,
+            "end_time": endTime
         ]
 
         do {
@@ -454,6 +486,7 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
                 do {
                     // Parse the JSON response
                     if let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                        print(jsonResponse)
                         result(jsonResponse)
                     } else {
                         result(FlutterError(code: "INVALID_RESPONSE", message: "Invalid response format", details: nil))
@@ -471,6 +504,143 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
     }
 
 
+
+    public func getCurrentTrip(apiKey: String, userId: String, result: @escaping FlutterResult) {
+        let params = [
+            "api_key": apiKey,
+            "user_id": userId
+        ]
+
+        let urlString = Api.activeTripUrl + "?" + paramString(params)
+
+        guard let url = URL(string: urlString) else {
+            result(FlutterError(code: "INVALID_URL", message: "Invalid API URL", details: nil))
+            return
+        }
+
+        let task = URLSession.shared.dataTask(with: url) { data, response, error in
+            if let error = error {
+                print("Error: \(error.localizedDescription)")
+                result(FlutterError(code: "NETWORK_ERROR", message: "Network error occurred", details: nil))
+                return
+            }
+
+            guard let data = data else {
+                result(FlutterError(code: "NO_DATA", message: "No data received", details: nil))
+                return
+            }
+
+            do {
+                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                   let isActive = json["active"] as? Bool {
+                    if isActive, let tripJson = json["trip"] as? [String: Any] {
+                        // Extract values from tripJson
+                        guard let tripId = tripJson["trip_id"] as? String,
+                              let startTime = tripJson["start_time"] as? String,
+                              let endTime = tripJson["end_time"] as? String,
+                              let tag = tripJson["tag"] as? String,
+                              let state = tripJson["state"] as? Int,
+                              let userId = tripJson["user_id"] as? String,
+                              let synced = tripJson["synced"] as? Int else {
+                            // Handle missing fields as needed
+                            result(FlutterError(code: "MISSING_FIELDS", message: "Missing trip fields.", details: nil))
+                            return
+                        }
+                        
+                        // Create the Trip instance
+                        let trip = Trip(tripId: tripId, startTime: startTime, endTime: endTime, tag: tag, state: state, userId: userId, synced: synced)
+                        result(trip) // Return trip object
+                    } else {
+                        result(nil) // No active trip
+                    }
+                } else {
+                    result(FlutterError(code: "INVALID_RESPONSE", message: "Response is not valid.", details: nil))
+                }
+            } catch {
+                print("JSON Parsing Error: \(error.localizedDescription)")
+                result(FlutterError(code: "JSON_PARSING_ERROR", message: "Failed to parse JSON response", details: error.localizedDescription))
+            }
+
+        }
+
+        task.resume()
+    }
+
+    func syncOfflineTrip(trip: Trip, apiKey: String, userId: String, completion: @escaping (Trip?, BarikoiTraceError?) -> Void) {
+        // Create a [String: Any] dictionary with the parameters
+        let params: [String: Any] = [
+            "api_key": apiKey,
+            "user_id": userId,
+            "start_time": trip.startTime,
+            "end_time": trip.endTime,
+            "tag": trip.tag ?? "",
+            "state": trip.state
+        ]
+
+        // Convert to [String: String] dictionary
+        var stringParams: [String: String] = [:]
+        for (key, value) in params {
+            if let stringValue = value as? String {
+                stringParams[key] = stringValue
+            } else if let intValue = value as? Int {
+                stringParams[key] = String(intValue) // Convert Int to String
+            }
+            // Handle other types if necessary
+        }
+
+        guard let url = URL(string: Api.tripSyncUrl) else {
+            completion(nil, .invalidUrlError)
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+        request.httpBody = paramString(stringParams).data(using: .utf8)
+
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Error: \(error.localizedDescription)")
+                completion(nil, .networkError)
+                return
+            }
+
+            guard let data = data else {
+                completion(nil, .noDataError)
+                return
+            }
+
+            do {
+                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                   let status = json["status"] as? Int {
+                    if status == 200 || status == 201 {
+                        completion(trip, nil) // Success
+                    } else if let message = json["message"] as? String {
+                        let error = BarikoiTraceError.networkError
+                        completion(nil, error)
+                    }
+                }
+            } catch {
+                print("JSON Parsing Error: \(error.localizedDescription)")
+                completion(nil, .jsonError(error))
+            }
+        }
+
+        task.resume()
+    }
+
+
+
+    private func paramString(_ params: [String: String]) -> String {
+        return params.map { "\($0)=\($1)" }.joined(separator: "&")
+    }
+
+    enum BarikoiTraceError: Error {
+        case networkError
+        case jsonError(Error)
+        case noDataError
+        case invalidUrlError
+    }
     
     // Flutter Stream Handler methods
     public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
@@ -483,3 +653,97 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
         return nil
     }
 }
+
+public class Trip {
+    var tripId: String
+    var startTime: String
+    var endTime: String
+    var tag: String?
+    var state: Int
+    var userId: String
+    var synced: Int
+
+    // Initializer
+    public init(tripId: String, startTime: String, endTime: String, tag: String?, state: Int, userId: String, synced: Int) {
+        self.tripId = tripId
+        self.startTime = startTime
+        self.endTime = endTime
+        self.tag = tag
+        self.state = state
+        self.userId = userId
+        self.synced = synced
+    }
+
+    // Getters and Setters (optional in Swift)
+    public func getTripId() -> String {
+        return tripId
+    }
+
+    public func setTripId(_ tripId: String) {
+        self.tripId = tripId
+    }
+
+    public func getStartTime() -> String {
+        return startTime
+    }
+
+    public func setStartTime(_ startTime: String) {
+        self.startTime = startTime
+    }
+
+    public func getEndTime() -> String {
+        return endTime
+    }
+
+    public func setEndTime(_ endTime: String) {
+        self.endTime = endTime
+    }
+
+    public func getTag() -> String? {
+        return tag
+    }
+
+    public func setTag(_ tag: String?) {
+        self.tag = tag
+    }
+
+    public func getState() -> Int {
+        return state
+    }
+
+    public func setState(_ state: Int) {
+        self.state = state
+    }
+
+    public func getSynced() -> Int {
+        return synced
+    }
+
+    public func setSynced(_ synced: Int) {
+        self.synced = synced
+    }
+
+    public func getUserId() -> String {
+        return userId
+    }
+
+    public func setUserId(_ userId: String) {
+        self.userId = userId
+    }
+}
+
+class Api {
+    static let baseUrl = "https://tracev2.barikoimaps.dev"
+
+    static let startTripUrl = "\(baseUrl)/trip/create"
+    static let endTripUrl = "\(baseUrl)/trip/end"
+    static let tripSyncUrl = "\(baseUrl)/trip/offline"
+    static let gpxUrl = "\(baseUrl)/sdk/add-gpx"
+    static let bulkUrl = "\(baseUrl)/sdk/bulk-gpx"
+    static let userUrl = "\(baseUrl)/sdk/user"
+    static let createUserUrl = "\(baseUrl)/sdk/authenticate"
+    static let activeTripUrl = "\(baseUrl)/trip/check-active-trip"
+    static let companySettingsUrl = "\(baseUrl)/sdk/get-company-settings"
+    static let appLogUrl = "\(baseUrl)/app/log"
+}
+

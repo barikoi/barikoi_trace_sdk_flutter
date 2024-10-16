@@ -9,12 +9,12 @@ class TraceUserResponse {
 
   factory TraceUserResponse.fromJson(Map<String, dynamic> json) {
     return TraceUserResponse(
-      user: User.fromJson(json["user"] as Map<String, dynamic>),
+      user: User.fromJson(json['user'] as Map<String, dynamic>),
     );
   }
 
   Map<String, dynamic> toJson() => {
-        "user": user.toJson(),
+        'user': user.toJson(),
       };
 }
 
@@ -27,11 +27,11 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json["_id"] as String, // Only keep _id
+      id: json['_id'] as String, // Only keep _id
     );
   }
 
   Map<String, dynamic> toJson() => {
-        "_id": id, // Only serialize _id
+        '_id': id, // Only serialize _id
       };
 }

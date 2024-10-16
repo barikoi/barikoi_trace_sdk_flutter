@@ -1,5 +1,8 @@
-import 'package:barikoi_trace_sdk_flutter_platform_interface/barikoi_trace_sdk_flutter_platform_interface.dart';
 import 'dart:io' show Platform;
+
+import 'package:barikoi_trace_sdk_flutter/kv.dart';
+import 'package:barikoi_trace_sdk_flutter_platform_interface/barikoi_trace_sdk_flutter_platform_interface.dart';
+import 'package:flutter/services.dart';
 
 BarikoiTraceSdkFlutterPlatform get _platform =>
     BarikoiTraceSdkFlutterPlatform.instance;
@@ -43,6 +46,10 @@ class BarikoiTraceSdkFlutter {
     _apiKey = apiKey;
     _instance ??= BarikoiTraceSdkFlutter._(apiKey: apiKey);
 
+    () async {
+      final sharedPreferencesService = SharedPreferencesService();
+      await sharedPreferencesService.init();
+    }.call();
     // init android sdk
     if (Platform.isAndroid) {
       _platform.intAndroidSdk(apiKey);
@@ -59,32 +66,74 @@ class BarikoiTraceSdkFlutter {
     return _instance!;
   }
 
-  Future<void> startTracking({required String userId}) async {
-    if (_apiKey == null) {
-      throw Exception('SDK not initialized. API key is required.');
-    }
-    await _platform.startTracking(userId: userId, apiKey: _apiKey!);
-  }
-
-  Future<void> stopTracking() async {
-    if (_apiKey == null) {
-      throw Exception('SDK not initialized. API key is required.');
-    }
-    await _platform.stopTracking();
-  }
-
-  Future<TraceUserResponse> setOrCreateUser({
-    required String name,
-    required String phone,
+  Future<void> startTracking({
+    int? updateInterval,
+    int? distaceInterval,
+    int? accuracyfilter,
+    String? tag,
   }) async {
     if (_apiKey == null) {
       throw Exception('SDK not initialized. API key is required.');
     }
-    return _platform.setOrCreateUser(
-      name: name,
-      phone: phone,
-      apiKey: _apiKey!,
-    );
+    final userId = await getUserId();
+    if (userId == null) {
+      throw Exception(
+        'User ID is null. Set or create a user before starting tracking.',
+      );
+    }
+    await _platform.startTracking(userId: userId, apiKey: _apiKey!);
+  }
+
+  Future<void> stopTracking({
+    void Function(String? userId)? onSuccess,
+    void Function(String? errorCode, String? errorMessage)? onError,
+  }) async {
+    if (_apiKey == null) {
+      onError?.call('ERROR', 'SDK not initialized. API key is required.');
+      throw Exception('SDK not initialized. API key is required.');
+    }
+    try {
+      await _platform.stopTracking();
+      onSuccess?.call(await getUserId());
+    } catch (e) {
+      onError?.call('ERROR', e.toString());
+    }
+  }
+
+  Future<void> setOrCreateUser({
+    required String name,
+    required String phone,
+    void Function(String? userId)? onSuccess,
+    void Function(String? errorCode, String? errorMessage)? onError,
+  }) async {
+    if (_apiKey == null) {
+      onError?.call('ERROR', 'SDK not initialized. API key is required.');
+      throw Exception('SDK not initialized. API key is required.');
+    }
+    try {
+      final res = await _platform.setOrCreateUser(
+        name: name,
+        phone: phone,
+        apiKey: _apiKey!,
+      );
+      final sharedPreferencesService = SharedPreferencesService();
+      await sharedPreferencesService.setUserId(res.user.id);
+      onSuccess?.call(res.user.id);
+    } on PlatformException catch (e) {
+      final errorCode = e.code;
+      final errorMessage = e.message;
+      onError?.call(errorCode, errorMessage);
+    }
+  }
+
+  Future<String?> getUserId() async {
+    final sharedPreferencesService = SharedPreferencesService();
+    return sharedPreferencesService.getUserId();
+  }
+
+  Future<String?> getTripId() async {
+    final sharedPreferencesService = SharedPreferencesService();
+    return sharedPreferencesService.getTripId();
   }
 
   Future<String?> createTrip({
@@ -94,45 +143,124 @@ class BarikoiTraceSdkFlutter {
     if (_apiKey == null) {
       throw Exception('SDK not initialized. API key is required.');
     }
-    return _platform.createTrip(
+    final tripId = await _platform.createTrip(
       userId: userId,
       apiKey: _apiKey!,
       fieldForceId: fieldForceId,
     );
+
+    return tripId;
   }
 
   Future<String?> startTrip({
-    required String tripId,
-    required String fieldforceId,
+    String? fieldforceId,
     int? updateInterval, // todo
     int? distaceInterval, // todo
     int? accuracyfilter, // todo
     String? tag,
+    void Function(String? tripId)? onSuccess,
+    void Function(String? errorCode, String? errorMessage)? onError,
   }) async {
     if (_apiKey == null) {
+      onError?.call('ERROR', 'SDK not initialized. API key is required.');
       throw Exception('SDK not initialized. API key is required.');
     }
-    return _platform.startTrip(
-      tripId: tripId,
-      apiKey: _apiKey!,
-      fieldforceId: fieldforceId,
-      accuracyfilter: accuracyfilter,
-      distaceInterval: distaceInterval,
-      updateInterval: updateInterval,
-    );
+    String? userId = '';
+    String? tripId = '';
+
+    if (Platform.isIOS) {
+      userId = await getUserId();
+      if (userId == null || userId.isEmpty) {
+        onError?.call('ERROR',
+            'User ID is null. Set or create a user before starting tracking.');
+        throw Exception(
+          'User ID is null. Set or create a user before starting tracking.',
+        );
+      }
+      final tripId = await createTrip(
+        userId: userId,
+        fieldForceId: fieldforceId,
+      );
+      if (tripId == null || tripId.isEmpty) {
+        onError?.call('ERROR', 'Trip ID is null. Start trip failed.');
+        throw Exception('Trip ID is null. Start trip failed.');
+      }
+      final sharedPreferencesService = SharedPreferencesService();
+      await sharedPreferencesService.setTripId(tripId);
+      try {
+        await startTracking(
+          updateInterval: updateInterval,
+          distaceInterval: distaceInterval,
+          accuracyfilter: accuracyfilter,
+          tag: tag,
+        );
+      } on PlatformException catch (e) {
+        onError?.call(e.code, e.message);
+      }
+      try {
+        await _platform.startTrip(
+          tag: "test",
+          apiKey: _apiKey!,
+          userId: fieldforceId ?? userId,
+          accuracyfilter: accuracyfilter,
+          distaceInterval: distaceInterval,
+          updateInterval: updateInterval,
+        );
+        onSuccess?.call(tripId);
+        final sharedPreferencesService = SharedPreferencesService();
+        await sharedPreferencesService.setTripId(tripId);
+      } catch (e) {
+        onError?.call('ERROR', e.toString());
+      }
+    }else{
+      try {
+        final tripIdAndroid = await _platform.startTrip(
+          tag: "tag",
+          apiKey: _apiKey!,
+          userId: fieldforceId ?? userId,
+          accuracyfilter: accuracyfilter,
+          distaceInterval: distaceInterval,
+          updateInterval: updateInterval,
+        );
+        onSuccess?.call(tripIdAndroid);
+        final sharedPreferencesService = SharedPreferencesService();
+        await sharedPreferencesService.setTripId(tripIdAndroid!);
+      } catch (e) {
+        onError?.call('ERROR', e.toString());
+      }
+    }
+
   }
 
-  Future<String?> endTrip({
-    required String tripId,
-    required String fieldforceId,
+  Future<void> endTrip({
+    String? fieldforceId,
+    void Function(String? tripId)? onSuccess,
+    void Function(String? errorCode, String? errorMessage)? onError,
   }) async {
     if (_apiKey == null) {
       throw Exception('SDK not initialized. API key is required.');
     }
-    return _platform.endTrip(
-      tripId: tripId,
-      apiKey: _apiKey!,
-      fieldforceId: fieldforceId,
-    );
+    final tripId = await getTripId();
+    if (tripId == null || tripId.isEmpty) {
+      onError?.call('ERROR', 'Trip ID is null. End trip failed.');
+      throw Exception('Trip ID is null. End trip failed.');
+    }
+    final userId = await getUserId();
+    if (userId == null || userId.isEmpty) {
+      onError?.call('ERROR', 'User ID is null. End trip failed.');
+      throw Exception('User ID is null. End trip failed.');
+    }
+    try {
+      await _platform.endTrip(
+        apiKey: _apiKey!,
+        userId: fieldforceId ?? userId,
+      );
+      onSuccess?.call(tripId);
+      final sharedPreferencesService = SharedPreferencesService();
+      await sharedPreferencesService.setTripId('');
+      await stopTracking();
+    } on PlatformException catch (e) {
+      onError?.call(e.code, e.message);
+    }
   }
 }

@@ -16,9 +16,8 @@ class MethodChannelBarikoiTraceSdkFlutter
 
   @override
   Future<String?> endTrip({
-    required String tripId,
+    required String userId,
     required String apiKey,
-    String? fieldforceId,
   }) {
     // TODO: implement endTrip
     throw UnimplementedError();
@@ -55,9 +54,8 @@ class MethodChannelBarikoiTraceSdkFlutter
 
   @override
   Future<String?> startTrip({
-    required String tripId,
     required String apiKey,
-    String? fieldforceId,
+    required String userId,
     int? updateInterval,
     int? distaceInterval,
     int? accuracyfilter,

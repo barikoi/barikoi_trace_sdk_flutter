@@ -23,6 +23,7 @@ dependencies:
     path: ../barikoi_trace_sdk_flutter_ios
   barikoi_trace_sdk_flutter_platform_interface:
     path: ../barikoi_trace_sdk_flutter_platform_interface
+  shared_preferences: ^2.3.2
 
 dev_dependencies:
   flutter_test:

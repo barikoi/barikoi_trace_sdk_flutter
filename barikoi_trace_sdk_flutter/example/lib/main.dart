@@ -39,11 +39,14 @@ class _HomePageState extends State<HomePage> {
               onPressed: () async {
                 if (!context.mounted) return;
                 try {
-                  final user = await BarikoiTraceSdkFlutter.instance
-                      .setOrCreateUser(name: 'test', phone: '01676529696');
-
-                  print(user.user.id);
-                  userId = user.user.id;
+                  await BarikoiTraceSdkFlutter.instance.setOrCreateUser(
+                    name: 'test',
+                    phone: '01676529696',
+                    onSuccess: (id) {
+                      print(userId);
+                      userId = id;
+                    },
+                  );
                   setState(() {});
                 } catch (error) {
                   if (!context.mounted) return;
@@ -55,7 +58,7 @@ class _HomePageState extends State<HomePage> {
                   );
                 }
               },
-              child: const Text('Set or Create User'),
+              child: const Text('Set or Create Use r'),
             ),
             Text('User Id: $userId'),
             const Divider(),
@@ -63,8 +66,7 @@ class _HomePageState extends State<HomePage> {
               onPressed: () async {
                 if (!context.mounted) return;
                 try {
-                  await BarikoiTraceSdkFlutter.instance
-                      .startTracking(userId: userId ?? '');
+                  await BarikoiTraceSdkFlutter.instance.startTracking();
                 } catch (error) {
                   if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -120,8 +122,11 @@ class _HomePageState extends State<HomePage> {
                 if (!context.mounted) return;
                 try {
                   await BarikoiTraceSdkFlutter.instance.startTrip(
-                    tripId: tripId!,
-                    fieldforceId: userId!,
+                    onSuccess: (id) {
+                      print(id);
+                      tripId = id;
+                      setState(() {});
+                    },
                   );
                 } catch (error) {
                   if (!context.mounted) return;
@@ -140,8 +145,22 @@ class _HomePageState extends State<HomePage> {
                 if (!context.mounted) return;
                 try {
                   await BarikoiTraceSdkFlutter.instance.endTrip(
-                    tripId: tripId!,
-                    fieldforceId: userId!,
+                    onSuccess: (tripId) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          backgroundColor: Theme.of(context).primaryColor,
+                          content: Text(tripId ?? ''),
+                        ),
+                      );
+                    },
+                    onError: (errorCode, errorMessage) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          backgroundColor: Theme.of(context).primaryColor,
+                          content: Text(errorMessage ?? ''),
+                        ),
+                      );
+                    },
                   );
                 } catch (error) {
                   if (!context.mounted) return;
