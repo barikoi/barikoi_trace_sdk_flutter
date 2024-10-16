@@ -506,65 +506,59 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
 
 
     public func getCurrentTrip(apiKey: String, userId: String, result: @escaping FlutterResult) {
-        let params = [
-            "api_key": apiKey,
-            "user_id": userId
+        print("Fetching current trip...")
+        print(userId)
+        // Create URL components using the base URL
+        var components = URLComponents(string: Api.activeTripUrl)!
+        components.queryItems = [
+            URLQueryItem(name: "user_id", value: userId),
+            URLQueryItem(name: "api_key", value: apiKey)
         ]
 
-        let urlString = Api.activeTripUrl + "?" + paramString(params)
-
-        guard let url = URL(string: urlString) else {
+        // Ensure the URL is valid
+        guard let url = components.url else {
             result(FlutterError(code: "INVALID_URL", message: "Invalid API URL", details: nil))
             return
         }
 
-        let task = URLSession.shared.dataTask(with: url) { data, response, error in
+        // Create a URL request
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET" // Set the request method to GET
+        print("Request URL: \(url)")
+        // Perform the network request
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            // Check for errors
             if let error = error {
                 print("Error: \(error.localizedDescription)")
                 result(FlutterError(code: "NETWORK_ERROR", message: "Network error occurred", details: nil))
                 return
             }
 
+            // Check for data
             guard let data = data else {
                 result(FlutterError(code: "NO_DATA", message: "No data received", details: nil))
                 return
             }
 
+            // Attempt to parse the JSON response
             do {
-                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                   let isActive = json["active"] as? Bool {
-                    if isActive, let tripJson = json["trip"] as? [String: Any] {
-                        // Extract values from tripJson
-                        guard let tripId = tripJson["trip_id"] as? String,
-                              let startTime = tripJson["start_time"] as? String,
-                              let endTime = tripJson["end_time"] as? String,
-                              let tag = tripJson["tag"] as? String,
-                              let state = tripJson["state"] as? Int,
-                              let userId = tripJson["user_id"] as? String,
-                              let synced = tripJson["synced"] as? Int else {
-                            // Handle missing fields as needed
-                            result(FlutterError(code: "MISSING_FIELDS", message: "Missing trip fields.", details: nil))
-                            return
-                        }
-                        
-                        // Create the Trip instance
-                        let trip = Trip(tripId: tripId, startTime: startTime, endTime: endTime, tag: tag, state: state, userId: userId, synced: synced)
-                        result(trip) // Return trip object
-                    } else {
-                        result(nil) // No active trip
-                    }
+                if let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                    print(jsonResponse) // Print the JSON response for debugging
+                    result(jsonResponse) // Return the parsed JSON
                 } else {
-                    result(FlutterError(code: "INVALID_RESPONSE", message: "Response is not valid.", details: nil))
+                    result(FlutterError(code: "INVALID_RESPONSE", message: "Invalid response format", details: nil))
                 }
             } catch {
                 print("JSON Parsing Error: \(error.localizedDescription)")
                 result(FlutterError(code: "JSON_PARSING_ERROR", message: "Failed to parse JSON response", details: error.localizedDescription))
             }
-
         }
 
+        // Start the network request
         task.resume()
     }
+
+    
 
     func syncOfflineTrip(trip: Trip, apiKey: String, userId: String, completion: @escaping (Trip?, BarikoiTraceError?) -> Void) {
         // Create a [String: Any] dictionary with the parameters
@@ -615,7 +609,7 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
                    let status = json["status"] as? Int {
                     if status == 200 || status == 201 {
                         completion(trip, nil) // Success
-                    } else if let message = json["message"] as? String {
+                    } else if json["message"] is String {
                         let error = BarikoiTraceError.networkError
                         completion(nil, error)
                     }

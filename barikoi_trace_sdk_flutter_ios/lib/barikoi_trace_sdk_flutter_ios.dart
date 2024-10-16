@@ -2,6 +2,8 @@ import 'package:barikoi_trace_sdk_flutter_platform_interface/barikoi_trace_sdk_f
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import 'models/current_trip.dart';
+
 /// The iOS implementation of [BarikoiTraceSdkFlutterPlatform].
 class BarikoiTraceSdkFlutterIOS extends BarikoiTraceSdkFlutterPlatform {
   /// The method channel used to interact with the native platform.
@@ -73,6 +75,16 @@ class BarikoiTraceSdkFlutterIOS extends BarikoiTraceSdkFlutterPlatform {
     int? accuracyfilter,
     String? tag,
   }) async {
+    print("startTrip");
+    final trip = await methodChannel.invokeMethod('getCurrentTrip', {
+      'apiKey': apiKey,
+      'userId': userId,
+    });
+    print(trip);
+    final tripData = TripResponse.fromJson(trip as Map<String, dynamic>);
+    if (tripData.active) {
+      throw Exception('Trip already active');
+    }
     await methodChannel.invokeMethod('startTrip', {
       'tag': tag,
       'user_id': userId,

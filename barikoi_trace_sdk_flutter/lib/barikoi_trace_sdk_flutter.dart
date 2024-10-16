@@ -165,71 +165,24 @@ class BarikoiTraceSdkFlutter {
       onError?.call('ERROR', 'SDK not initialized. API key is required.');
       throw Exception('SDK not initialized. API key is required.');
     }
-    String? userId = '';
+    String? userId = await getUserId();
     String? tripId = '';
 
-    if (Platform.isIOS) {
-      userId = await getUserId();
-      if (userId == null || userId.isEmpty) {
-        onError?.call('ERROR',
-            'User ID is null. Set or create a user before starting tracking.');
-        throw Exception(
-          'User ID is null. Set or create a user before starting tracking.',
-        );
-      }
-      final tripId = await createTrip(
-        userId: userId,
-        fieldForceId: fieldforceId,
+    try {
+      final tripIdAndroid = await _platform.startTrip(
+        tag: "tag",
+        apiKey: _apiKey!,
+        userId: fieldforceId ?? userId ?? '',
+        accuracyfilter: accuracyfilter,
+        distaceInterval: distaceInterval,
+        updateInterval: updateInterval,
       );
-      if (tripId == null || tripId.isEmpty) {
-        onError?.call('ERROR', 'Trip ID is null. Start trip failed.');
-        throw Exception('Trip ID is null. Start trip failed.');
-      }
+      onSuccess?.call(tripIdAndroid);
       final sharedPreferencesService = SharedPreferencesService();
-      await sharedPreferencesService.setTripId(tripId);
-      try {
-        await startTracking(
-          updateInterval: updateInterval,
-          distaceInterval: distaceInterval,
-          accuracyfilter: accuracyfilter,
-          tag: tag,
-        );
-      } on PlatformException catch (e) {
-        onError?.call(e.code, e.message);
-      }
-      try {
-        await _platform.startTrip(
-          tag: "test",
-          apiKey: _apiKey!,
-          userId: fieldforceId ?? userId,
-          accuracyfilter: accuracyfilter,
-          distaceInterval: distaceInterval,
-          updateInterval: updateInterval,
-        );
-        onSuccess?.call(tripId);
-        final sharedPreferencesService = SharedPreferencesService();
-        await sharedPreferencesService.setTripId(tripId);
-      } catch (e) {
-        onError?.call('ERROR', e.toString());
-      }
-    }else{
-      try {
-        final tripIdAndroid = await _platform.startTrip(
-          tag: "tag",
-          apiKey: _apiKey!,
-          userId: fieldforceId ?? userId,
-          accuracyfilter: accuracyfilter,
-          distaceInterval: distaceInterval,
-          updateInterval: updateInterval,
-        );
-        onSuccess?.call(tripIdAndroid);
-        final sharedPreferencesService = SharedPreferencesService();
-        await sharedPreferencesService.setTripId(tripIdAndroid!);
-      } catch (e) {
-        onError?.call('ERROR', e.toString());
-      }
+      await sharedPreferencesService.setTripId(tripIdAndroid!);
+    } catch (e) {
+      onError?.call('ERROR', e.toString());
     }
-
   }
 
   Future<void> endTrip({
