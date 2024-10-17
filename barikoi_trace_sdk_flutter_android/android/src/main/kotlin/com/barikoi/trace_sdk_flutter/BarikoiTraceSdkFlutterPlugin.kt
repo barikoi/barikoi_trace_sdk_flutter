@@ -1,4 +1,4 @@
-package com.example.verygoodcore
+package com.barikoi.trace_sdk_flutter
 
 import android.app.Activity
 import android.content.Context
@@ -102,10 +102,11 @@ class BarikoiTraceSdkFlutterPlugin : FlutterPlugin, MethodCallHandler,ActivityAw
                 val updateInterval = call.argument("updateInterval") ?: 5
                 val distanceFilter = call.argument("distanceFilter") ?: 0
                 val accuracyFilter = call.argument("accuracyFilter") ?: 300
+
                 val tracemode = TraceMode.Builder()
                 tracemode.setUpdateInterval(updateInterval)
                 tracemode.setDistancefilter(distanceFilter)
-                tracemode.setaccuracyFilter(accuracyFilter)
+               // tracemode.setaccuracyFilter(accuracyFilter)
                 activity.let {
                     BarikoiTrace.requestNotificationPermission(it)
                     if (!BarikoiTrace.isLocationPermissionsGranted()) {
@@ -138,7 +139,7 @@ class BarikoiTraceSdkFlutterPlugin : FlutterPlugin, MethodCallHandler,ActivityAw
                 val tracemode = TraceMode.Builder()
                 tracemode.setUpdateInterval(updateInterval)
                 tracemode.setDistancefilter(distanceFilter)
-                tracemode.setaccuracyFilter(accuracyFilter)
+                //tracemode.setaccuracyFilter(accuracyFilter)
                 activity.let {
                     BarikoiTrace.requestNotificationPermission(it)
                     if (!BarikoiTrace.isLocationPermissionsGranted()) {

@@ -145,12 +145,14 @@ class BarikoiTraceSdkFlutter {
   ///
   /// Parameters:
   /// - [name]: The name of the user.
+  /// - [email]: The email of the user.
   /// - [phone]: The phone number of the user.
   /// - [onSuccess]: A callback function that is called with the user ID on success.
   /// - [onError]: A callback function that is called with error details if an error occurs.
   Future<void> setOrCreateUser({
-    required String name,
     required String phone,
+    String? name,
+    String? email,
     void Function(String? userId)? onSuccess,
     void Function(String? errorCode, String? errorMessage)? onError,
   }) async {
@@ -163,6 +165,7 @@ class BarikoiTraceSdkFlutter {
       final res = await _platform.setOrCreateUser(
         name: name,
         phone: phone,
+        email: email,
         apiKey: _apiKey!,
       );
 

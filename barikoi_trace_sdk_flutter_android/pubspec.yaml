@@ -4,14 +4,14 @@ version: 0.1.0+1
 publish_to: none
 
 environment:
-  sdk: ^3.4.0
+  sdk: ">=2.12.0 <4.0.0"
 
 flutter:
   plugin:
     implements: barikoi_trace_sdk_flutter
     platforms:
       android:
-        package: com.example.verygoodcore
+        package: com.barikoi.trace_sdk_flutter
         pluginClass: BarikoiTraceSdkFlutterPlugin
         dartPluginClass: BarikoiTraceSdkFlutterAndroid
 

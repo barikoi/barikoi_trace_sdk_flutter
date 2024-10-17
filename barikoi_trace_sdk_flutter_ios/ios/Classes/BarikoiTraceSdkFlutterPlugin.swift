@@ -41,8 +41,10 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
         case "getOrCreateUser":
             if let args = call.arguments as? [String: Any],
                let phoneNumber = args["phoneNumber"] as? String,
+               let email = args["email"] as? String,
+               let name = args["name"] as? String,
                let apiKey = args["apiKey"] as? String {
-               getOrCreateUser(phoneNumber: phoneNumber, apiKey: apiKey, result: result)
+               getOrCreateUser(name:name, email: email, phoneNumber: phoneNumber, apiKey: apiKey, result: result)
             } else {
                 result(FlutterError(code: "INVALID_ARGUMENT",
                                    message: "Missing phoneNumber or apiKey",
@@ -226,7 +228,7 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
     }
 
     
-    public func getOrCreateUser(phoneNumber: String, apiKey: String, result: @escaping FlutterResult) {
+    public func getOrCreateUser(name: String, email: String, phoneNumber: String, apiKey: String, result: @escaping FlutterResult) {
         // Replace 'BASE_URL' with your actual base URL
         guard let url = URL(string: Api.createUserUrl) else {
             result(FlutterError(code: "INVALID_URL", message: "Invalid API URL", details: nil))
@@ -239,7 +241,7 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         // Create the request body according to the API structure
-        let requestBody: [String: Any] = ["phone": phoneNumber, "api_key": apiKey]
+        let requestBody: [String: Any] = ["phone": phoneNumber, "api_key": apiKey, "name": name,"email": email]
 
         do {
             request.httpBody = try JSONSerialization.data(withJSONObject: requestBody, options: [])

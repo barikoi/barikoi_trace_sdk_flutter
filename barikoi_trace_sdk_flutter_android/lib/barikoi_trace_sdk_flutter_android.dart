@@ -45,7 +45,6 @@ class BarikoiTraceSdkFlutterAndroid extends BarikoiTraceSdkFlutterPlatform {
     required String apiKey,
     String? name,
     String? email,
-
   }) async {
     final arguments = {
       'name': name,

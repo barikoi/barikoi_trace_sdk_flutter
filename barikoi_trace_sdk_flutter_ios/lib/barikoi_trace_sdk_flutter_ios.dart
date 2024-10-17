@@ -44,6 +44,8 @@ class BarikoiTraceSdkFlutterIOS extends BarikoiTraceSdkFlutterPlatform {
     String? email,
   }) async {
     final user = await methodChannel.invokeMethod('getOrCreateUser', {
+      'name': name,
+      'email': email,
       'phoneNumber': phone,
       'apiKey': apiKey,
     });
