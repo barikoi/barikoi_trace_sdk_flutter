@@ -36,8 +36,8 @@ class BarikoiTraceSdkFlutterMock extends BarikoiTraceSdkFlutterPlatform {
   @override
   Future<void> startTracking(
       {int? updateInterval,
-      int? distaceInterval,
-      int? accuracyfilter,
+      int? distanceInterval,
+      int? accuracyFilter,
       String? tag,
       required String userId,
       required String apiKey}) {
@@ -50,8 +50,8 @@ class BarikoiTraceSdkFlutterMock extends BarikoiTraceSdkFlutterPlatform {
     required String apiKey,
     required String userId,
     int? updateInterval,
-    int? distaceInterval,
-    int? accuracyfilter,
+    int? distanceInterval,
+    int? accuracyFilter,
     String? tag,
   }) {
     // TODO: implement startTrip

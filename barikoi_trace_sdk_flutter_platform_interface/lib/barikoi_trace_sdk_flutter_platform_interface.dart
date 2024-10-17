@@ -58,13 +58,13 @@ abstract class BarikoiTraceSdkFlutterPlatform extends PlatformInterface {
   ///
   /// Parameters:
   /// - [updateInterval]: Optional update interval in seconds.
-  /// - [distaceInterval]: Optional distance interval in meters.
-  /// - [accuracyfilter]: Optional accuracy filter in meters.
+  /// - [distanceInterval]: Optional distance interval in meters.
+  /// - [accuracyFilter]: Optional accuracy filter in meters.
   /// - [tag]: Optional tag for tracking.
   Future<void> startTracking({
     int? updateInterval,
-    int? distaceInterval,
-    int? accuracyfilter,
+    int? distanceInterval,
+    int? accuracyFilter,
     String? tag,
     required String userId,
     required String apiKey,
@@ -87,15 +87,15 @@ abstract class BarikoiTraceSdkFlutterPlatform extends PlatformInterface {
   ///
   /// Parameters:
   /// - [updateInterval]: Optional update interval in seconds.
-  /// - [distaceInterval]: Optional distance interval in meters.
-  /// - [accuracyfilter]: Optional accuracy filter in meters.
+  /// - [distanceInterval]: Optional distance interval in meters.
+  /// - [accuracyFilter]: Optional accuracy filter in meters.
   /// - [tag]: Optional tag for the trip.
   Future<String?> startTrip({
     required String apiKey,
     required String userId,
     int? updateInterval,
-    int? distaceInterval,
-    int? accuracyfilter,
+    int? distanceInterval,
+    int? accuracyFilter,
     String? tag,
   });
 

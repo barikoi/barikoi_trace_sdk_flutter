@@ -71,15 +71,15 @@ class BarikoiTraceSdkFlutterAndroid extends BarikoiTraceSdkFlutterPlatform {
     required String userId,
     required String apiKey,
     int? updateInterval,
-    int? distaceInterval,
-    int? accuracyfilter,
+    int? distanceInterval,
+    int? accuracyFilter,
     String? tag,
   }) async {
     final arguments = {
       'tag': tag,
       updateInterval: updateInterval,
-      distaceInterval: distaceInterval,
-      accuracyfilter: accuracyfilter,
+      distanceInterval: distanceInterval,
+      accuracyFilter: accuracyFilter,
     };
     await methodChannel.invokeMethod('startTracking', arguments);
   }
@@ -89,15 +89,15 @@ class BarikoiTraceSdkFlutterAndroid extends BarikoiTraceSdkFlutterPlatform {
     required String apiKey,
     required String userId,
     int? updateInterval,
-    int? distaceInterval,
-    int? accuracyfilter,
+    int? distanceInterval,
+    int? accuracyFilter,
     String? tag,
   }) async {
     final arguments = {
       'tag': tag,
       'updateInterval': updateInterval,
-      'distaceInterval': distaceInterval,
-      'accuracyfilter': accuracyfilter,
+      'distanceInterval': distanceInterval,
+      'accuracyFilter': accuracyFilter,
     };
     return methodChannel.invokeMethod('startTrip', arguments);
   }

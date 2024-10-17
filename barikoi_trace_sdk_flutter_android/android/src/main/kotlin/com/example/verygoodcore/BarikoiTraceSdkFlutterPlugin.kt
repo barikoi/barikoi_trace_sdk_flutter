@@ -105,7 +105,7 @@ class BarikoiTraceSdkFlutterPlugin : FlutterPlugin, MethodCallHandler,ActivityAw
                 val tracemode = TraceMode.Builder()
                 tracemode.setUpdateInterval(updateInterval)
                 tracemode.setDistancefilter(distanceFilter)
-                tracemode.setAccuracyFilter(accuracyFilter)
+                tracemode.setaccuracyFilter(accuracyFilter)
                 activity.let {
                     BarikoiTrace.requestNotificationPermission(it)
                     if (!BarikoiTrace.isLocationPermissionsGranted()) {
@@ -138,7 +138,7 @@ class BarikoiTraceSdkFlutterPlugin : FlutterPlugin, MethodCallHandler,ActivityAw
                 val tracemode = TraceMode.Builder()
                 tracemode.setUpdateInterval(updateInterval)
                 tracemode.setDistancefilter(distanceFilter)
-                tracemode.setAccuracyFilter(accuracyFilter)
+                tracemode.setaccuracyFilter(accuracyFilter)
                 activity.let {
                     BarikoiTrace.requestNotificationPermission(it)
                     if (!BarikoiTrace.isLocationPermissionsGranted()) {

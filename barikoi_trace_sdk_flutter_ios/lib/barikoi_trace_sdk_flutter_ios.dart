@@ -59,8 +59,8 @@ class BarikoiTraceSdkFlutterIOS extends BarikoiTraceSdkFlutterPlatform {
       {required String userId,
       required String apiKey,
       int? updateInterval,
-      int? distaceInterval,
-      int? accuracyfilter,
+      int? distanceInterval,
+      int? accuracyFilter,
       String? tag}) async {
     await methodChannel.invokeMethod<String>('startTracking', {
       'userId': userId,
@@ -73,20 +73,10 @@ class BarikoiTraceSdkFlutterIOS extends BarikoiTraceSdkFlutterPlatform {
     required String apiKey,
     required String userId,
     int? updateInterval,
-    int? distaceInterval,
-    int? accuracyfilter,
+    int? distanceInterval,
+    int? accuracyFilter,
     String? tag,
   }) async {
-   /* print("startTrip");
-    final trip = await methodChannel.invokeMethod('getCurrentTrip', {
-      'apiKey': apiKey,
-      'userId': userId,
-    });
-    print(trip);
-    if (trip['active'] == true) {
-
-      throw Exception('Trip already active');
-    }*/
     await methodChannel.invokeMethod('startTrip', {
       'tag': tag,
       'user_id': userId,
@@ -108,7 +98,7 @@ class BarikoiTraceSdkFlutterIOS extends BarikoiTraceSdkFlutterPlatform {
   }) async {
     final trip = await methodChannel.invokeMethod('createTrip', {
       'userId': userId,
-      'fieldforceId': fieldForceId ?? userId,
+      'fieldForceId': fieldForceId ?? userId,
       'apiKey': apiKey,
     });
     return trip['_id'] as String;

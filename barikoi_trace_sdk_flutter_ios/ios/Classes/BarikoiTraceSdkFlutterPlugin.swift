@@ -52,9 +52,9 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
         case "createTrip":
             if let args = call.arguments as? [String: Any],
                let userId = args["userId"] as? String,
-               let fieldforceId = args["fieldforceId"] as? String,
+               let fieldForceId = args["fieldForceId"] as? String,
                let apiKey = args["apiKey"] as? String {
-                createTrip(userId: userId, fieldforceId: fieldforceId, apiKey: apiKey, result: result)
+                createTrip(userId: userId, fieldForceId: fieldForceId, apiKey: apiKey, result: result)
             } else {
                 result(FlutterError(code: "INVALID_ARGUMENT",
                                    message: "Missing userId or apiKey",
@@ -279,7 +279,7 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
 
     public func createTrip(
         userId: String,
-        fieldforceId: String,
+        fieldForceId: String,
         apiKey: String,
         result: @escaping FlutterResult
     ) {
@@ -314,7 +314,7 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
         // Create the request body according to the API structure
         let requestBody: [String: Any] = [
             "user_id": userId,
-            "fieldforce_id": fieldforceId,
+            "fieldforce_id": fieldForceId,
             "api_key": apiKey,
             "latitude": String(latitude),
             "longitude": String(longitude)
