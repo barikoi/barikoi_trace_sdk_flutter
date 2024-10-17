@@ -1,7 +1,6 @@
 import 'package:barikoi_trace_sdk_flutter_platform_interface/barikoi_trace_sdk_flutter_platform_interface.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter/services.dart';
-
 /// An implementation of [BarikoiTraceSdkFlutterPlatform] that uses method channels.
 class MethodChannelBarikoiTraceSdkFlutter
     extends BarikoiTraceSdkFlutterPlatform {
@@ -84,5 +83,11 @@ class MethodChannelBarikoiTraceSdkFlutter
   @override
   void intAndroidSdk(String apiKey) {
     // TODO: implement intAndroidSdk
+  }
+
+  @override
+  Future<dynamic> getCurrentTrip({required String apiKey, required String userId}) {
+    // TODO: implement getCurrentTrip
+    throw UnimplementedError();
   }
 }

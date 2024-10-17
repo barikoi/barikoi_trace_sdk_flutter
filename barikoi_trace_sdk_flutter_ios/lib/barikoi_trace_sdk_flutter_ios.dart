@@ -2,8 +2,6 @@ import 'package:barikoi_trace_sdk_flutter_platform_interface/barikoi_trace_sdk_f
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import 'models/current_trip.dart';
-
 /// The iOS implementation of [BarikoiTraceSdkFlutterPlatform].
 class BarikoiTraceSdkFlutterIOS extends BarikoiTraceSdkFlutterPlatform {
   /// The method channel used to interact with the native platform.
@@ -40,7 +38,9 @@ class BarikoiTraceSdkFlutterIOS extends BarikoiTraceSdkFlutterPlatform {
 
   @override
   Future<TraceUserResponse> setOrCreateUser({
-    required String phone, required String apiKey, String? name,
+    required String phone,
+    required String apiKey,
+    String? name,
     String? email,
   }) async {
     final user = await methodChannel.invokeMethod('getOrCreateUser', {
@@ -56,7 +56,9 @@ class BarikoiTraceSdkFlutterIOS extends BarikoiTraceSdkFlutterPlatform {
 
   @override
   Future<void> startTracking(
-      {required String userId, required String apiKey, int? updateInterval,
+      {required String userId,
+      required String apiKey,
+      int? updateInterval,
       int? distaceInterval,
       int? accuracyfilter,
       String? tag}) async {
@@ -75,16 +77,16 @@ class BarikoiTraceSdkFlutterIOS extends BarikoiTraceSdkFlutterPlatform {
     int? accuracyfilter,
     String? tag,
   }) async {
-    print("startTrip");
+   /* print("startTrip");
     final trip = await methodChannel.invokeMethod('getCurrentTrip', {
       'apiKey': apiKey,
       'userId': userId,
     });
     print(trip);
-    final tripData = TripResponse.fromJson(trip as Map<String, dynamic>);
-    if (tripData.active) {
+    if (trip['active'] == true) {
+
       throw Exception('Trip already active');
-    }
+    }*/
     await methodChannel.invokeMethod('startTrip', {
       'tag': tag,
       'user_id': userId,
@@ -115,5 +117,17 @@ class BarikoiTraceSdkFlutterIOS extends BarikoiTraceSdkFlutterPlatform {
   @override
   void intAndroidSdk(String apiKey) {
     // TODO: implement intAndroidSdk
+  }
+
+  @override
+  Future<dynamic> getCurrentTrip({
+    required String apiKey,
+    required String userId,
+  }) async {
+    final trip = await methodChannel.invokeMethod('getCurrentTrip', {
+      'apiKey': apiKey,
+      'userId': userId,
+    });
+    return trip;
   }
 }

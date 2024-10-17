@@ -78,6 +78,12 @@ class BarikoiTraceSdkFlutterMock extends BarikoiTraceSdkFlutterPlatform {
   void intAndroidSdk(String apiKey) {
     // TODO: implement intAndroidSdk
   }
+
+  @override
+  Future<dynamic> getCurrentTrip({required String apiKey, required String userId}) {
+    // TODO: implement getCurrentTrip
+    throw UnimplementedError();
+  }
 }
 
 void main() {

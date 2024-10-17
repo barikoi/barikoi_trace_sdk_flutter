@@ -116,4 +116,10 @@ class BarikoiTraceSdkFlutterAndroid extends BarikoiTraceSdkFlutterPlatform {
     // TODO: implement createTrip
     throw UnimplementedError();
   }
+
+  @override
+  Future<dynamic> getCurrentTrip({required String apiKey, required String userId}) {
+    // TODO: implement getCurrentTrip
+    throw UnimplementedError();
+  }
 }

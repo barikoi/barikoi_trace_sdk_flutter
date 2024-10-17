@@ -1,6 +1,7 @@
 import 'package:barikoi_trace_sdk_flutter_platform_interface/src/method_channel_barikoi_trace_sdk_flutter.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
+
 part 'src/model/trace_user.dart';
 
 /// The interface that implementations of barikoi_trace_sdk_flutter must implement.
@@ -104,6 +105,11 @@ abstract class BarikoiTraceSdkFlutterPlatform extends PlatformInterface {
   Future<String?> endTrip({
     required String userId,
     required String apiKey,
+  });
+
+  Future<dynamic> getCurrentTrip({
+    required String apiKey,
+    required String userId,
   });
 
   /// Retrieves the user ID.

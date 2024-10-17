@@ -54,8 +54,32 @@ class BarikoiTraceSdkFlutter {
     if (Platform.isAndroid) {
       _platform.intAndroidSdk(apiKey);
     }
+    if (Platform.isIOS) {
+      _instance!._syncIosTrip();
+    }
     // Return the singleton instance
     return _instance!;
+  }
+
+  _syncIosTrip() async {
+    final userId = await getUserId();
+    final tripId = await getTripId();
+    if (tripId == null) {
+      return;
+    }
+    if (userId == null) {
+      return;
+    }
+    final onGoingTrip = await _platform.getCurrentTrip(
+      userId: userId,
+      apiKey: _apiKey!,
+    );
+    if (onGoingTrip.active == false) {
+      return;
+    }
+    if (onGoingTrip.trip?.tripId == tripId) {
+      await _platform.startTracking(userId: userId, apiKey: _apiKey!);
+    }
   }
 
   // Static getter to access the singleton instance
@@ -166,7 +190,28 @@ class BarikoiTraceSdkFlutter {
       throw Exception('SDK not initialized. API key is required.');
     }
     String? userId = await getUserId();
-    String? tripId = '';
+    if (userId == null) {
+      onError?.call('ERROR',
+          'User ID is null. Set or create a user before starting tracking.');
+      throw Exception(
+          'User ID is null. Set or create a user before starting tracking.');
+    }
+    if (Platform.isIOS) {
+      final tripId = await getTripId();
+      final res =
+          await _platform.getCurrentTrip(apiKey: _apiKey!, userId: userId);
+      if (res['active'] == true) {
+        if (res['trip']['_id'] != tripId) {
+          await SharedPreferencesService().setTripId('');
+          onError?.call('ERROR', 'Trip already active');
+          throw Exception('Trip already active');
+        }
+
+        await _platform.startTracking(apiKey: _apiKey!, userId: userId);
+        onSuccess?.call(tripId);
+        return "";
+      }
+    }
 
     try {
       final tripIdAndroid = await _platform.startTrip(
@@ -193,16 +238,25 @@ class BarikoiTraceSdkFlutter {
     if (_apiKey == null) {
       throw Exception('SDK not initialized. API key is required.');
     }
-    final tripId = await getTripId();
-    if (tripId == null || tripId.isEmpty) {
-      onError?.call('ERROR', 'Trip ID is null. End trip failed.');
-      throw Exception('Trip ID is null. End trip failed.');
-    }
     final userId = await getUserId();
     if (userId == null || userId.isEmpty) {
       onError?.call('ERROR', 'User ID is null. End trip failed.');
       throw Exception('User ID is null. End trip failed.');
     }
+    String? tripId = await getTripId();
+    if (Platform.isIOS) {
+      final res =
+      await _platform.getCurrentTrip(apiKey: _apiKey!, userId: userId);
+      if (res['active'] == true) {
+        tripId = res['trip']['_id'] as String;
+      }
+    }
+    if (tripId == null || tripId.isEmpty) {
+      onError?.call('ERROR', 'Trip ID is null. End trip failed.');
+      throw Exception('Trip ID is null. End trip failed.');
+    }
+
+
     try {
       await _platform.endTrip(
         apiKey: _apiKey!,
