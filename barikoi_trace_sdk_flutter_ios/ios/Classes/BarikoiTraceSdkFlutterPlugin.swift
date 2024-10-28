@@ -186,8 +186,9 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
             return
         }
 
-        // Use ISO 8601 format for gpx_time
-        let gpxTimeFormatter = ISO8601DateFormatter()
+        let gpxTimeFormatter = DateFormatter()
+        gpxTimeFormatter.dateFormat = "yyyy-M-d H:mm:ss"
+        gpxTimeFormatter.timeZone = TimeZone.current
         let gpxTime = gpxTimeFormatter.string(from: Date())
 
         let url = URL(string: Api.gpxUrl)!
@@ -206,6 +207,8 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
             "gpx_time": gpxTime,  // Use the formatted gpxTime
             "api_key": apiKey
         ]
+        
+        print(parameters)
 
         do {
             request.httpBody = try JSONSerialization.data(withJSONObject: parameters, options: [])
@@ -373,9 +376,9 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
         self.userId = userId
         startTracking()
 
-        // Use ISO 8601 format for gpx_time
-       let gpxTimeFormatter = ISO8601DateFormatter()
-       gpxTimeFormatter.timeZone = TimeZone(secondsFromGMT: 6 * 3600) // UTC+6 offset
+        let gpxTimeFormatter = DateFormatter()
+        gpxTimeFormatter.dateFormat = "yyyy-M-d H:mm:ss"
+       gpxTimeFormatter.timeZone = TimeZone.current // UTC+6 offset
        let gpxTime = gpxTimeFormatter.string(from: Date())
 
         print(gpxTime)
@@ -445,8 +448,9 @@ public class BarikoiTraceSdkFlutterPlugin: NSObject, FlutterPlugin, CLLocationMa
         stopTracking()
 
         // Use ISO 8601 format for end_time
-       let isoDateFormatter = ISO8601DateFormatter()
-       isoDateFormatter.timeZone = TimeZone(secondsFromGMT: 6 * 3600) // UTC+6 offset
+       let isoDateFormatter = DateFormatter()
+       isoDateFormatter.dateFormat = "yyyy-M-d H:mm:ss"
+        isoDateFormatter.timeZone = TimeZone.current
        let endTime = isoDateFormatter.string(from: Date())
 
         
