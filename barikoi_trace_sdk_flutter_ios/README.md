@@ -32,3 +32,6 @@ Additionally, enable background location updates by adding this key:
 </array>
 
 ```
+
+> [!WARNING]  
+> Make sure your app has a user-facing feature that justifies background location tracking; otherwise, the App Store may reject the app. 
