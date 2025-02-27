@@ -16,7 +16,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final _barikoiTraceSdkFlutterPlugin = BarikoiTraceSdkFlutter();
+  final _barikoiTrace = BarikoiTraceSdkFlutter();
 
   @override
   void initState() {
@@ -25,40 +25,62 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> initBarikoiTrace() async {
-    await _barikoiTraceSdkFlutterPlugin.initialize(apiKey: "BARIKOI_API_KEY");
+    await _barikoiTrace.initialize(apiKey: "BARIKOI_API_KEY");
   }
 
   Future<void> setOrCreateUser() async {
-    _barikoiTraceSdkFlutterPlugin.setOrCreateUser(name: 'sakib 4', phone: 'PHONE_NUMBER',
+    _barikoiTrace.setOrCreateUser(name: 'sakib 4', phone: 'PHONE_NUMBER',
     onSuccess: (userid){
       Fluttertoast.showToast( msg:"user id: $userid");
+      _barikoiTrace.syncTrip(onSuccess: (TripId){
+        if(TripId != null) Fluttertoast.showToast( msg:"Synced Trip id: $TripId");
+        else Fluttertoast.showToast( msg:"No trip to sync");
+      }, onError: (errorCode,errorMessage){
+        Fluttertoast.showToast( msg:"Error: $errorCode, $errorMessage");
+      });
     }, onError: (errorCode,errorMessage){
       Fluttertoast.showToast( msg:"Error: $errorCode, $errorMessage");
     });
   }
 
   startTracing() async {
-    if( await Permission.location.request().isGranted) {
+    // if( await Permission.location.request().isGranted) {
       if(await Permission.notification.request().isGranted) {
-        _barikoiTraceSdkFlutterPlugin.startTrip(tag: "test",
+        _barikoiTrace.startTrip(tag: "test",
             updateInterval: 15,
             accuracyfilter: 100,
             onSuccess: (tripid) {
-              Fluttertoast.showToast( msg:"Trip id: $tripid");
+              Fluttertoast.showToast( msg:"tracking started");
             },
             onError: (errorCode, errorMessage) {
               Fluttertoast.showToast( msg: "Error: $errorCode, $errorMessage");
             });
       } else Fluttertoast.showToast( msg:"Notification permission not granted");
-    }else Fluttertoast.showToast( msg:"Location permission not granted");
+    // }else Fluttertoast.showToast( msg:"Location permission not granted");
   }
 
   stopTracing() async {
-     _barikoiTraceSdkFlutterPlugin.endTrip(onSuccess:(tripid){
-       Fluttertoast.showToast( msg:"ended Trip id: $tripid");
+     _barikoiTrace.endTrip(
+         onSuccess: (tripid) {
+       Fluttertoast.showToast( msg:"tracking started");
+     },
+         onError: (errorCode, errorMessage) {
+           Fluttertoast.showToast( msg: "Error: $errorCode, $errorMessage");
+         });
+  }
+
+  synctrace() async {
+    _barikoiTrace.syncTrip(onSuccess: (TripId){
+      if(TripId != null) Fluttertoast.showToast( msg:"Synced Trip id: $TripId");
+      else Fluttertoast.showToast( msg:"No trip to sync");
     }, onError: (errorCode,errorMessage){
-       Fluttertoast.showToast( msg:"Error: $errorCode, $errorMessage");
+      Fluttertoast.showToast( msg:"Error: $errorCode, $errorMessage");
     });
+  }
+
+  checkTrace() async {
+    bool istrackingon= await _barikoiTrace.isLocationTracking();
+    Fluttertoast.showToast( msg:"Tracking: $istrackingon");
   }
 
   @override
@@ -81,6 +103,12 @@ class _MyAppState extends State<MyApp> {
               ElevatedButton(onPressed: (){
                 stopTracing();
               }, child: const Text("Stop Trace")),
+              ElevatedButton(onPressed: (){
+                checkTrace();
+              }, child: const Text("check service")),
+              ElevatedButton(onPressed: (){
+                synctrace();
+              }, child: const Text("Sync Trip "))
             ],
           ),
         ),

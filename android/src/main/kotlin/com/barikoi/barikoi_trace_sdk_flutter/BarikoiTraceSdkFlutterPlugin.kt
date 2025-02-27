@@ -218,6 +218,15 @@ class BarikoiTraceSdkFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityA
                     else result.success(true)
                 }
             }
+            "isLocationTracking" ->{
+                activity.let {
+                    if (!BarikoiTrace.isLocationTracking()) {
+                        result.success(false)
+                    }
+                    else result.success(true)
+                    return
+                }
+            }
             else -> result.notImplemented()
         }
 

@@ -23,14 +23,18 @@ class BarikoiTraceSdkFlutter {
     });
   }
 
-  Future<void> startTracking({int? updateInterval, int? distaceInterval, int? accuracyfilter , String? tag}) async {
+  Future<void> startTracking({int? updateInterval, int? distaceInterval, int? accuracyfilter , String? tag,  Function()? onSuccess,   Function(String? errorCode,String? errorMessage)? onError }) async {
     var arguments = {
       'tag': tag,
       updateInterval: updateInterval,
       distaceInterval: distaceInterval,
       accuracyfilter: accuracyfilter
     };
-    await _channel.invokeMethod('startTracking',arguments);
+    await _channel.invokeMethod('startTracking',arguments).then((value) {
+      onSuccess?.call();
+    }).onError((PlatformException error, stackTrace) {
+      onError?.call(error.code,error.message);
+    });
   }
 
   Future<void> stopTracking() async {
@@ -58,7 +62,20 @@ class BarikoiTraceSdkFlutter {
       }).onError((PlatformException error, stackTrace) {
          onError(error.code,error.message);
        });
-    }
+  }
+
+  syncTrip({ required Function(String? tripid) onSuccess,  required Function(String? errorCode,String? errorMessage) onError }) async {
+       _channel.invokeMethod('getTripId').then((tripid){
+       onSuccess(tripid);
+      }).onError((PlatformException error, stackTrace) {
+         onError(error.code,error.message);
+       });
+  }
+  Future<bool> isLocationTracking() async {
+    final isTracking = await _channel.invokeMethod<bool>('isLocationTracking');
+    return isTracking ?? false;
+  }
+
 
   Future<String?> getUserId() async {
     final userId = await _channel.invokeMethod<String>('getUserId');
